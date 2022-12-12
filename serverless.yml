@@ -1,0 +1,149 @@
+service: aws-api
+frameworkVersion: '3'
+
+plugins:
+  - serverless-domain-manager
+  - serverless-offline
+
+provider:
+  endpointType: EDGE
+  environment:
+    user_pool_id: { Ref: UserPool }
+    client_id: { Ref: UserClient }
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - cognito-idp:AdminInitiateAuth
+        - cognito-idp:AdminCreateUser
+        - cognito-idp:AdminSetUserPassword
+      Resource: '*'
+  memorySize: 128
+  name: aws
+  region: us-east-1
+  runtime: nodejs18.x
+  stage: dev
+  timeout: 5
+
+custom:
+  localhost: http://localhost:3000
+  rootDomain: veterancrowd.com
+  apiSubdomain: api
+  authSubdomain: auth2
+
+  authCallbackUrls:
+    - 'https://${self:custom.apiSubdomain}.${self:custom.rootDomain}/${self:custom.customDomain.basePath}/login'
+    - '${self:custom.localhost}/api/auth/callback/cognito'
+  authLogoutUrls:
+    - '${self:custom.localhost}'
+  certificateArn: arn:aws:acm:us-east-1:546652796775:certificate/a3487e96-b00d-4acc-95b4-20570e472332
+  customDomain:
+    domainName: ${self:custom.apiSubdomain}.${self:custom.rootDomain}
+    basePath: ${self:custom.stage2ApiBasePath.${opt:stage, self:provider.stage}}
+    certificateArn: ${self:custom.certificateArn}
+  stage2AuthSubdomain:
+    dev: ${self:custom.authSubdomain}-dev
+    prod: ${self:custom.authSubdomain}
+    test: ${self:custom.authSubdomain}-test
+  stage2ApiBasePath:
+    dev: 'v0-dev'
+    prod: 'v0'
+    test: 'v0-test'
+
+functions:
+  hello:
+    handler: api/open/hello.get
+    description: GET /hello
+    events:
+      - http:
+          path: hello
+          method: get
+          cors: true
+
+  secure-hello:
+    handler: api/secure/hello.get
+    events:
+      - http:
+          path: secure-hello
+          method: get
+          cors: true
+          authorizer:
+            name: UserPoolAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: !GetAtt UserPool.Arn
+            claims:
+              - email
+
+resources:
+  Resources:
+    UserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        AutoVerifiedAttributes: ['email']
+        Schema:
+          - Name: email
+            Mutable: true
+            Required: true
+        UsernameConfiguration:
+          CaseSensitive: false
+        UserPoolName: ${self:service}-userpool-${opt:stage, self:provider.stage}
+
+    UserPoolIdentityProviderGoogle:
+      Type: AWS::Cognito::UserPoolIdentityProvider
+      Properties:
+        UserPoolId: !Ref UserPool
+        ProviderName: Google
+        ProviderDetails:
+          client_id: '295049270448-sseqdpeulnadikp9j03q82g9108i1bea.apps.googleusercontent.com'
+          client_secret: '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'
+          authorize_scopes: 'profile email openid'
+        ProviderType: Google
+        AttributeMapping:
+          email: email
+
+    UserClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        AllowedOAuthFlows:
+          - code
+        AllowedOAuthFlowsUserPoolClient: true
+        AllowedOAuthScopes:
+          - email
+          - openid
+          - profile
+        CallbackURLs: ${self:custom.authCallbackUrls}
+        ClientName: web-app
+        GenerateSecret: true
+        LogoutURLs: ${self:custom.authLogoutUrls}
+        SupportedIdentityProviders:
+          - COGNITO
+          - Google
+        UserPoolId: !Ref UserPool
+
+    UserPoolDomain:
+      Type: AWS::Cognito::UserPoolDomain
+      Properties:
+        CustomDomainConfig:
+          CertificateArn: ${self:custom.certificateArn}
+        Domain: ${self:custom.stage2AuthSubdomain.${opt:stage, self:provider.stage}}.${self:custom.rootDomain}
+        UserPoolId: !Ref UserPool
+
+    UserPoolAlias:
+      Type: AWS::Route53::RecordSetGroup
+      Properties:
+        HostedZoneName: '${self:custom.rootDomain}.'
+        RecordSets:
+          - Name: ${self:custom.stage2AuthSubdomain.${opt:stage, self:provider.stage}}.${self:custom.rootDomain}.
+            ResourceRecords:
+              - !GetAtt UserPoolDomain.CloudFrontDistribution
+            TTL: '300'
+            Type: CNAME
+
+    GatewayResponseDefault4XX:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
