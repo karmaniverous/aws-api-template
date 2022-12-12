@@ -1,0 +1,21 @@
+{
+  "name": "aws-api",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "serverless-domain-manager": "^6.2.1",
+    "serverless-offline": "^11.6.0"
+  },
+  "dependencies": {
+    "@middy/core": "^4.0.5",
+    "@middy/http-cors": "^4.0.4",
+    "@middy/http-error-handler": "^4.0.4",
+    "aws-sdk": "^2.1271.0"
+  }
+}
