@@ -139,6 +139,10 @@ To generate all AWS resources from scratch, follow these steps:
    sls deploy -s prod --aws-profile <profile name>
    ```
 
+# Creating a New Stage
+
+TODO
+
 # Deleting a Stack
 
 Deleting a CloudFormation stack allows for a clean deployment of all stack resources to AWS.
