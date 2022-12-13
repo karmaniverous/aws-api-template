@@ -1,14 +1,52 @@
+# AWS API Template
+
 This template produces a secure Amazon Web Services (AWS) API using the [Serverless Framework](https://www.serverless.com/).
 
-The API is secured by a Cognito User Pool and features both public and secure endpoints. It is intended to hook into AWS CodePipeline to support automated builds when commmits are made to the `dev`, `test`, and `main` branches. See [DevOps](#devops) below for more info.
+The API features both public and private endpoints, and is secured by a Cognito User Pool that supports native username/password authentication and one federated identity provider (Google). It is configured to act as both the authentication provider and a secure remote API for my [Next.js Template](https://github.com/karmaniverous/template-nextjs) on the front end.
 
-This template is supported by live APIs as described below, and is intended to integrate with my [Next.js Template](https://github.com/karmaniverous/template-nextjs) on the front end. See that template for examples (and a live demo) of hooking into this API.
+This template can be deployed directly from the command line to multiple [AWS CloudFormation](https://aws.amazon.com/cloudformation/) stacks, each exposing an independent environment (e.g. `dev`, `test`, and `prod`), with its own authentication provider, at configurable endpoints. These endpoints will integrate with matching Next.js Template environments.
 
-> Because this template in intended to hook into live examples, my domain (`karmanivero.us`) is referenced all over it. Obviously, replace this with references to your own domain when you clone the template!
+If you integrate your code repository with [AWS CodePipeline](https://aws.amazon.com/codepipeline/), your code will automatically build and deploy following every push to the relevant branch. See [Setting Up CodePipeline](#setting-up-codepipeline) below for more info.
+
+> This template is in fact hooked into CodePipeline to support deployments to demo environments. Consequently you will see many references to the `karmanivero.us` domain. Obviously, you'll need to replace these with references to your own domain.
+
+# The Stack
+
+This template represents a specific solution to a bunch of specific problems. It makes a number of highly opinionated choices. Here are some of them:
+
+## The Serverless Framework
+
+There are many different ways to script the creation of AWS resources.
+
+The [AWS CLI](https://aws.amazon.com/cli/) is the gold standard. It's maximally powerful, but very low level. It's probably smarter than I am.
+
+[AWS Amplify](https://aws.amazon.com/amplify/) is new, super powerful, and supported by a great UI. It's also very HIGH-level and doesn't yet enjoy broad community support.
+
+The [Serverless Framework](https://www.serverless.com/) is a well-supported, open-source wrapper over the AWS CLI. It is opinionated with respect to best practices, offers a ton of plugins, and is accessible to the talented amateur, of which I am one.
+
+There are other choices as well, but we're using the Serverless Framework here because it seemed like a reasonably safe choice that offers plenty of room to grow.
+
+## Project Configuration
+
+As mentioned above, this template is intended to deploy to multiple environments in a highly configurable fashion. Both the project as a whole and individual environments include _secrets_: configurations that need to exist in your dev environment to support local testing and manual deployment, but should NOT be pushed to your code repository.
+
+The key AWS configuration file in the project is `serverless.yml`. Nominally this file would contain most of this stuff, but I thought it would be a good idea to abstract configuration data away from this highly structured file.
+
+Everybody understands `.env` environment variable files, so that seemed to be a great way to go, which is nominally supported by the [Serverless Dotenv Plugin](https://www.serverless.com/plugins/serverless-dotenv-plugin). Unfortunately, I couldn't get it to work.
+
+So I eliminated this dependency and am relying instead on the very robust [`dotenv-cli`](https://www.npmjs.com/package/dotenv-cli) tool, which does everything the plugin promises and works like a charm.
+
+Because of this, you will almost NEVER run `sls` directly! Instead, you will preface it with `dotenv` and your target environment, like this:
+
+```bash
+dotenv -c dev -- sls deploy
+```
+
+More info on this in the relevant sections below.
 
 # Setting Up Your Dev Environment
 
-Use the [Visual Studio Code](https://code.visualstudio.com/) IDE in order to leverage relevant extensions.
+Use the [Visual Studio Code](https://code.visualstudio.com/) IDE in order to leverage relevant extensions. Not an absolute requirement but you'll be happy if you do.
 
 These instructions are written from the perspective of the Windows OS. If you are a Mac user, you may need to make some adjustments.
 
@@ -16,13 +54,13 @@ They also assume you have local administrator permissions on your development ma
 
 ## Install Applications & Global Packages
 
-AWS-API is implemented in [Node.js](https://nodejs.org/en/). Node.js is now in `v19`, but the latest AWS Lambda Function Node.js execution environment is `v18`. The current Node.js LTS version is `v18.12.1`, so we'll use that one.
+This template is a [Node.js](https://nodejs.org/en/) project. Node.js is now in `v19`, but the latest [AWS Lambda](https://aws.amazon.com/lambda/) Node.js execution environment is `v18`. The current Node.js LTS version is `v18.12.1`, so we'll use that one.
 
 Rather than install Node.js directly, it is better to install it & manage versions from the the Node Version Manager (NVM). Follow these instructions to configure your system:
 
-1. If you already have Node.js installed on your machine, uninstall it completely and remove all installation. You can easily use NVM to reinstall & switch between other desired Node versions.
+1. If you already have Node.js installed on your machine, uninstall it completely and remove all installation files. You can easily use NVM to reinstall & switch between other desired Node versions.
 
-1. Follow [these instructions](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/) to install NVM on your system.
+1. Follow [these instructions](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/) to install NVM on your system. **This is a Windows-specific implementation!** Mac/Linux users, adjust accordingly.
 
 1. Once NVM is installed on your system, open a terminal with **System Admin Permissions** and run the following commands:
 
@@ -33,7 +71,7 @@ Rather than install Node.js directly, it is better to install it & manage versio
    # all platforms
    nvm install 18.12.1
    nvm use 18.12.1
-   npm install -g serverless
+   npm install -g serverless dotenv-cli
    ```
 
 1. Install Git for your operating system from [this page](https://git-scm.com/download).
@@ -46,17 +84,23 @@ Rather than install Node.js directly, it is better to install it & manage versio
    Remove-Item alias:sls
    ```
 
-1. RESTART YOUR MACHINE!
+1. **Restart your machine.**
+
+## Create a new GitHub Repository
+
+[Click here](https://github.com/karmaniverous/aws-api-template/generate) to clone this template into your own GitHub account. Give it a name like `my-aws-api`.
+
+> **Are you cloning an existing repository?** No need to do this then.
 
 ## Clone the Project Repository
 
-Navigate your terminal to the directory you use for code repositories and run this command to clone this repo. You may be asked to log into GitHub. Note that you must be an authorized contributor to this repo in order to clone it. Note that this command clones the `dev` branch, which is the development trunk. This repo will not accept direct commits to the `main` branch.
+Navigate your VS Code terminal to the directory you use for code repositories and run this command to clone this repo, using your new project name. You may be asked to log into GitHub.
 
 ```bash
-git clone -b dev https://github.com/karmaniverous/template-aws-api.git
+git clone https://github.com/karmaniverous/my-aws-api.git
 ```
 
-Open the newly created repo folder in VS Code.
+Open the newly created local repository folder in VS Code.
 
 If this is your first time opening the folder, you will be asked to install recommended VS Code extensions. Install them. If not, follow these steps to install all workspace-recommended extensions:
 
@@ -72,35 +116,31 @@ Run the following command to install project dependencies:
 npm install
 ```
 
+## Create Local Environmental Variable Files
+
+Look for these files in your project directory:
+
+- `.env.local.template`
+- `.env.dev.local.template`
+- `.env.test.local.template`
+- `.env.prod.local.template`
+
+Copy each of these files and remove the `template` extension from the copy.
+
+> **Do not simply rename these files!** Anybody who pulls your repo will need these templates to create the same files in his own local environment.
+
 ## Connect to AWS
 
 You will need to connect to AWS in order to interact with AWS resources during development.
 
-You should be in receipt of a CSV file containing your AWS access keys. It will contain data in this form:
+Generate an Access Key Id and Secret Access Key for either...
 
-| Access key ID | Secret access key |
-| ------------- | ----------------- |
-| AKI...M74     | gnG...v5f         |
+- Your AWS Root account (not recommended)
+- An [IAM](https://aws.amazon.com/iam/) user with admin permissions (or at least enough to support development)
 
-Follow these steps to connect to AWS:
+If you aren't able to do this, ask your AWS administrator.
 
-1. Within VS Code, type `Ctrl-Shift-P` (Windows/Linux) or `Shift-Cmd-P` (Mac) to bring up the command pallette and search for the `Connect to AWS` command.
-
-   <img src="readme-assets/connect-to-aws.png" width="400">
-
-1. Either choose an existing connection or create a new one with the `Add New Connection` option.
-
-   <img src="readme-assets/add-new-connection.png" width="400">
-
-1. Choose `Use IAM Credentials`, give the connection profile a unique name `<profile_name>`, and enter the Access Key ID and Secret Access Key from the CSV file referenced above.
-
-   <img src="readme-assets/use-iam-credentials.png" width="400">
-
-1. Run the following command in the VS Code terminal:
-
-   ```bash
-   aws configure set region us-east-1 --profile <profile_name>
-   ```
+Add those two values in the appropriate spots in `.env.local`.
 
 ## Test Your Setup
 
@@ -110,9 +150,11 @@ Enter the following command in a terminal window:
 dotenv -c dev -- sls offline
 ```
 
-A local server should start with an endpoint at [`http://localhost:3000/dev/hello`](http://localhost:3000/dev/hello). If you navigate to this endpoint in a browser, you should see a blob of JSON beginning with the message `Hello, world!`
+A local server should start with an endpoint at [`http://localhost:3000/v0-dev/hello`](http://localhost:3000/v0-dev/hello). If you navigate to this endpoint in a browser, you should see a blob of JSON with the message `Hello world!`
 
-<img src="readme-assets/hello-world.png" width="500">
+# Setting Up CodePipeline
+
+[TODO]
 
 # Building From Scratch
 
