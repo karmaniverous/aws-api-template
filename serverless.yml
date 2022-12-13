@@ -1,4 +1,4 @@
-service: aws-api
+service: aws-api-template
 frameworkVersion: '3'
 
 plugins:
