@@ -46,6 +46,10 @@ dotenv -c dev -- sls deploy
 
 More info on this in the relevant sections below.
 
+## Release Management
+
+[TODO]
+
 # Setting Up Your Dev Environment
 
 Use the [Visual Studio Code](https://code.visualstudio.com/) IDE in order to leverage relevant extensions. Not an absolute requirement but you'll be happy if you do.
