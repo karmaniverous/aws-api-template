@@ -10,6 +10,7 @@
   "license": "ISC",
   "devDependencies": {
     "serverless-domain-manager": "^6.2.1",
+    "serverless-dotenv-plugin": "^4.0.2",
     "serverless-offline": "^11.6.0"
   },
   "dependencies": {

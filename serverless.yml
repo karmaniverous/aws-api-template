@@ -3,6 +3,7 @@ frameworkVersion: '3'
 
 plugins:
   - serverless-domain-manager
+  - serverless-dotenv-plugin
   - serverless-offline
 
 provider:
