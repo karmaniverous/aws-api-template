@@ -52,6 +52,7 @@ functions:
 
   secure-hello:
     handler: api/secure/hello.get
+    description: GET /secure-hello
     events:
       - http:
           path: secure-hello
