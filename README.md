@@ -107,7 +107,7 @@ Follow these steps to connect to AWS:
 Enter the following command in a terminal window:
 
 ```bash
-sls offline
+dotenv -c dev -- sls offline
 ```
 
 A local server should start with an endpoint at [`http://localhost:3000/dev/hello`](http://localhost:3000/dev/hello). If you navigate to this endpoint in a browser, you should see a blob of JSON beginning with the message `Hello, world!`
