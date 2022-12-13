@@ -1,5 +1,7 @@
 # AWS API Template
 
+> **I am updating this README!** For now, these instructions are in a bit of an inconsistent state. Should be good to go in a few days!
+
 This template produces a secure Amazon Web Services (AWS) API using the [Serverless Framework](https://www.serverless.com/).
 
 The API features both public and private endpoints, and is secured by a Cognito User Pool that supports native username/password authentication and one federated identity provider (Google). It is configured to act as both the authentication provider and a secure remote API for my [Next.js Template](https://github.com/karmaniverous/template-nextjs) on the front end.
