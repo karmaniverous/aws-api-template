@@ -170,6 +170,10 @@ A local server should start with an endpoint at [`http://localhost:3000/v0-dev/h
 
 [TODO]
 
+# Adding Identity Providers
+
+[TODO]
+
 # Building From Scratch
 
 To generate all AWS resources from scratch, follow these steps:

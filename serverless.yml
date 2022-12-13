@@ -79,18 +79,18 @@ resources:
           CaseSensitive: false
         UserPoolName: ${env:SERVICE_NAME}-userpool-${env:STAGE}
 
-    UserPoolIdentityProviderGoogle:
-      Type: AWS::Cognito::UserPoolIdentityProvider
-      Properties:
-        UserPoolId: !Ref UserPool
-        ProviderName: Google
-        ProviderDetails:
-          client_id: '${env:GOOGLE_CLIENT_ID}'
-          client_secret: '${env:GOOGLE_CLIENT_SECRET}'
-          authorize_scopes: 'profile email openid'
-        ProviderType: Google
-        AttributeMapping:
-          email: email
+    # UserPoolIdentityProviderGoogle:
+    #   Type: AWS::Cognito::UserPoolIdentityProvider
+    #   Properties:
+    #     UserPoolId: !Ref UserPool
+    #     ProviderName: Google
+    #     ProviderDetails:
+    #       client_id: '${env:GOOGLE_CLIENT_ID}'
+    #       client_secret: '${env:GOOGLE_CLIENT_SECRET}'
+    #       authorize_scopes: 'profile email openid'
+    #     ProviderType: Google
+    #     AttributeMapping:
+    #       email: email
 
     UserClient:
       Type: AWS::Cognito::UserPoolClient
