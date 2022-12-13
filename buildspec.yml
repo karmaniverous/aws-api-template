@@ -3,17 +3,17 @@ version: 0.2
 phases:
   install:
     commands:
-      - echo Installing Serverless...
-      - npm install -g serverless
+      - echo Installing global packages...
+      - npm install -g serverless dotenv-cli
   pre_build:
     commands:
       - echo Installing NPM dependencies...
-      - npm install -p
+      - npm install
   build:
     commands:
       - echo Deployment started on `date`
       - echo Deploying with the Serverless Framework
-      - sls deploy -s $STAGE --verbose
+      - dotenv -c $STAGE -- sls deploy --verbose
   post_build:
     commands:
       - echo Deployment completed on `date`

@@ -1,4 +1,4 @@
-service: aws-api
+service: ${env:SERVICE_NAME}
 frameworkVersion: '3'
 
 plugins:
@@ -21,33 +21,24 @@ provider:
   name: aws
   region: us-east-1
   runtime: nodejs18.x
-  stage: dev
+  stage: ${env:STAGE}
   timeout: 5
 
-custom:
-  localhost: http://localhost:3000
-  rootDomain: veterancrowd.com
-  apiSubdomain: api
-  authSubdomain: auth2
+params:
+  default:
+    apiBasePath: ${env:API_VERSION}-${env:STAGE}
+    authSubdomain: ${env:AUTH_SUBDOMAIN}-${env:STAGE}
+    webSubdomain: ${env:WEB_SUBDOMAIN}-${env:STAGE}
+  prod:
+    apiBasePath: ${env:API_VERSION}
+    authSubdomain: ${env:AUTH_SUBDOMAIN}
+    webSubdomain: ${env:WEB_SUBDOMAIN}
 
-  authCallbackUrls:
-    - 'https://${self:custom.apiSubdomain}.${self:custom.rootDomain}/${self:custom.customDomain.basePath}/login'
-    - '${self:custom.localhost}/api/auth/callback/cognito'
-  authLogoutUrls:
-    - '${self:custom.localhost}'
-  certificateArn: arn:aws:acm:us-east-1:546652796775:certificate/a3487e96-b00d-4acc-95b4-20570e472332
+custom:
   customDomain:
-    domainName: ${self:custom.apiSubdomain}.${self:custom.rootDomain}
-    basePath: ${self:custom.stage2ApiBasePath.${opt:stage, self:provider.stage}}
-    certificateArn: ${self:custom.certificateArn}
-  stage2AuthSubdomain:
-    dev: ${self:custom.authSubdomain}-dev
-    prod: ${self:custom.authSubdomain}
-    test: ${self:custom.authSubdomain}-test
-  stage2ApiBasePath:
-    dev: 'v0-dev'
-    prod: 'v0'
-    test: 'v0-test'
+    domainName: ${env:API_SUBDOMAIN}.${env:ROOT_DOMAIN}
+    basePath: ${param:apiBasePath}
+    certificateArn: ${env:CERTIFICATE_ARN}
 
 functions:
   hello:
@@ -85,7 +76,7 @@ resources:
             Required: true
         UsernameConfiguration:
           CaseSensitive: false
-        UserPoolName: ${self:service}-userpool-${opt:stage, self:provider.stage}
+        UserPoolName: ${env:SERVICE_NAME}-userpool-${env:STAGE}
 
     UserPoolIdentityProviderGoogle:
       Type: AWS::Cognito::UserPoolIdentityProvider
@@ -93,8 +84,8 @@ resources:
         UserPoolId: !Ref UserPool
         ProviderName: Google
         ProviderDetails:
-          client_id: '295049270448-sseqdpeulnadikp9j03q82g9108i1bea.apps.googleusercontent.com'
-          client_secret: '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'
+          client_id: '${env:GOOGLE_CLIENT_ID}'
+          client_secret: '${env:GOOGLE_CLIENT_SECRET}'
           authorize_scopes: 'profile email openid'
         ProviderType: Google
         AttributeMapping:
@@ -110,29 +101,33 @@ resources:
           - email
           - openid
           - profile
-        CallbackURLs: ${self:custom.authCallbackUrls}
+        CallbackURLs:
+          - 'https://${param:webSubdomain}.${env:ROOT_DOMAIN}/api/auth/callback/cognito'
+          - 'http://localhost:${env:LOCALHOST_PORT}/api/auth/callback/cognito'
         ClientName: web-app
         GenerateSecret: true
-        LogoutURLs: ${self:custom.authLogoutUrls}
+        LogoutURLs:
+          - 'https://${param:webSubdomain}.${env:ROOT_DOMAIN}'
+          - 'http://localhost:${env:LOCALHOST_PORT}'
         SupportedIdentityProviders:
           - COGNITO
-          - Google
+          # - Google
         UserPoolId: !Ref UserPool
 
     UserPoolDomain:
       Type: AWS::Cognito::UserPoolDomain
       Properties:
         CustomDomainConfig:
-          CertificateArn: ${self:custom.certificateArn}
-        Domain: ${self:custom.stage2AuthSubdomain.${opt:stage, self:provider.stage}}.${self:custom.rootDomain}
+          CertificateArn: ${env:CERTIFICATE_ARN}
+        Domain: ${param:authSubdomain}.${env:ROOT_DOMAIN}
         UserPoolId: !Ref UserPool
 
     UserPoolAlias:
       Type: AWS::Route53::RecordSetGroup
       Properties:
-        HostedZoneName: '${self:custom.rootDomain}.'
+        HostedZoneName: '${env:ROOT_DOMAIN}.'
         RecordSets:
-          - Name: ${self:custom.stage2AuthSubdomain.${opt:stage, self:provider.stage}}.${self:custom.rootDomain}.
+          - Name: ${param:authSubdomain}.${env:ROOT_DOMAIN}.
             ResourceRecords:
               - !GetAtt UserPoolDomain.CloudFrontDistribution
             TTL: '300'
