@@ -8,7 +8,7 @@ phases:
   pre_build:
     commands:
       - echo Installing NPM dependencies...
-      - npm install -p
+      - npm install
   build:
     commands:
       - echo Deployment started on `date`
