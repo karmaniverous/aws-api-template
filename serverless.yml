@@ -3,7 +3,6 @@ frameworkVersion: '3'
 
 plugins:
   - serverless-domain-manager
-  - serverless-dotenv-plugin
   - serverless-offline
 
 provider:
@@ -27,14 +26,13 @@ provider:
 
 custom:
   localhost: http://localhost:3000
-  rootDomain: karmanivero.us
-  apiSubdomain: aws-api
-  authSubdomain: aws-auth
+  apiSubdomain: aws-api-template
+  authSubdomain: aws-api-template-auth
   webSubdomain: nextjs-template
 
   certificateArn: arn:aws:acm:us-east-1:706896224302:certificate/4d8ec53b-1770-4042-8484-e8557f6937ee
   customDomain:
-    domainName: ${self:custom.apiSubdomain}.${self:custom.rootDomain}
+    domainName: ${self:custom.apiSubdomain}.${env:ROOT_DOMAIN}
     basePath: ${self:custom.stage2ApiBasePath.${opt:stage, self:provider.stage}}
     certificateArn: ${self:custom.certificateArn}
   stage2ApiBasePath:
@@ -112,13 +110,13 @@ resources:
           - openid
           - profile
         CallbackURLs:
-          - 'https://${self:custom.apiSubdomain}.${self:custom.rootDomain}/${self:custom.customDomain.basePath}/login'
-          - 'https://${self:custom.stage2WebSubdomain.${opt:stage, self:provider.stage}}.${self:custom.rootDomain}/api/auth/callback/cognito'
+          - 'https://${self:custom.apiSubdomain}.${env:ROOT_DOMAIN}/${self:custom.customDomain.basePath}/login'
+          - 'https://${self:custom.stage2WebSubdomain.${opt:stage, self:provider.stage}}.${env:ROOT_DOMAIN}/api/auth/callback/cognito'
           - '${self:custom.localhost}/api/auth/callback/cognito'
         ClientName: web-app
         GenerateSecret: true
         LogoutURLs:
-          - 'https://${self:custom.stage2WebSubdomain.${opt:stage, self:provider.stage}}.${self:custom.rootDomain}'
+          - 'https://${self:custom.stage2WebSubdomain.${opt:stage, self:provider.stage}}.${env:ROOT_DOMAIN}'
           - '${self:custom.localhost}'
         SupportedIdentityProviders:
           - COGNITO
@@ -130,15 +128,15 @@ resources:
       Properties:
         CustomDomainConfig:
           CertificateArn: ${self:custom.certificateArn}
-        Domain: ${self:custom.stage2AuthSubdomain.${opt:stage, self:provider.stage}}.${self:custom.rootDomain}
+        Domain: ${self:custom.stage2AuthSubdomain.${opt:stage, self:provider.stage}}.${env:ROOT_DOMAIN}
         UserPoolId: !Ref UserPool
 
     UserPoolAlias:
       Type: AWS::Route53::RecordSetGroup
       Properties:
-        HostedZoneName: '${self:custom.rootDomain}.'
+        HostedZoneName: '${env:ROOT_DOMAIN}.'
         RecordSets:
-          - Name: ${self:custom.stage2AuthSubdomain.${opt:stage, self:provider.stage}}.${self:custom.rootDomain}.
+          - Name: ${self:custom.stage2AuthSubdomain.${opt:stage, self:provider.stage}}.${env:ROOT_DOMAIN}.
             ResourceRecords:
               - !GetAtt UserPoolDomain.CloudFrontDistribution
             TTL: '300'
