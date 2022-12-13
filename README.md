@@ -1,10 +1,14 @@
-# aws-api
+This template produces a secure Amazon Web Services (AWS) API using the [Serverless Framework](https://www.serverless.com/).
 
-This is the VeteranCrowd Amazon Web Services (AWS) API.
+The API is secured by a Cognito User Pool and features both public and secure endpoints. It is intended to hook into AWS CodePipeline to support automated builds when commmits are made to the `dev`, `test`, and `main` branches. See [DevOps](#devops) below for more info.
+
+This template is supported by live APIs as described below, and is intended to integrate with my [Next.js Template](https://github.com/karmaniverous/template-nextjs) on the front end. See that template for examples (and a live demo) of hooking into this API.
+
+> Because this template in intended to hook into live examples, my domain (`karmanivero.us`) is referenced all over it. Obviously, replace this with references to your own domain when you clone the template!
 
 # Setting Up Your Dev Environment
 
-All developers MUST use the Visual Studio Code IDE in order to leverage relevant extensions.
+Use the [Visual Studio Code](https://code.visualstudio.com/) IDE in order to leverage relevant extensions.
 
 These instructions are written from the perspective of the Windows OS. If you are a Mac user, you may need to make some adjustments.
 
@@ -49,7 +53,7 @@ Rather than install Node.js directly, it is better to install it & manage versio
 Navigate your terminal to the directory you use for code repositories and run this command to clone this repo. You may be asked to log into GitHub. Note that you must be an authorized contributor to this repo in order to clone it. Note that this command clones the `dev` branch, which is the development trunk. This repo will not accept direct commits to the `main` branch.
 
 ```bash
-git clone -b dev https://github.com/VeteranCrowd/aws-api.git
+git clone -b dev https://github.com/karmaniverous/template-aws-api.git
 ```
 
 Open the newly created repo folder in VS Code.
@@ -106,19 +110,17 @@ Enter the following command in a terminal window:
 sls offline
 ```
 
-A local server should start with an endpoint at [`http://localhost:3000/test/hello`](http://localhost:3000/test/hello). If you navigate to this endpoint in a browser, you should see a blob of JSON beginning with the message `Hello, world!`
+A local server should start with an endpoint at [`http://localhost:3000/dev/hello`](http://localhost:3000/dev/hello). If you navigate to this endpoint in a browser, you should see a blob of JSON beginning with the message `Hello, world!`
 
 <img src="readme-assets/hello-world.png" width="500">
 
 # Building From Scratch
 
-This will usually not be necessary, since AWS resources should already be in place.
-
 To generate all AWS resources from scratch, follow these steps:
 
-1. Request & validate a certificate from the [ACM Console](https://us-east-1.console.aws.amazon.com/acm/home#/certificates/list) that covers domains `veterancrowd.com` and `*.veterancrowd.com`. Copy the certificate ARN and paste it into `serverless.yml` at `custom.certificateArn`.
+1. Request & validate a certificate from the [ACM Console](https://us-east-1.console.aws.amazon.com/acm/home#/certificates/list) that covers domains `karmanivero.us` and `*.karmanivero.us`. Copy the certificate ARN and paste it into `serverless.yml` at `custom.certificateArn`.
 
-1. Run the following command to create an API Gateway custom domain at `api.veterancrowd.com`.
+1. Run the following command to create an API Gateway custom domain at `aws-api.karmanivero.us`.
 
    ```bash
    sls create_domain --aws-profile <profile name>
@@ -157,11 +159,11 @@ To delete a stack, follow these instructions:
 
 This project's code repository features two protected branches: `main` and `test`. Commits to these branches trigger build processes that update public endpoints. They are configured as follows:
 
-| Branch | Description         | Rules                                                 |                                                   Pipeline                                                    | Public Endpoint                      |
-| ------ | ------------------- | ----------------------------------------------------- | :-----------------------------------------------------------------------------------------------------------: | ------------------------------------ |
-| `dev`  | development trunk   | Direct commits & pull requests allowed.               |                                                     none                                                      | https://api.veterancrowd.com/v0-dev  |
-| `test` | integration testing | No direct commits.<br>Pull requests only from `dev`.  | [#](https://us-east-1.console.aws.amazon.com/codesuite/codepipeline/pipelines/aws-api-codepipeline-test/view) | https://api.veterancrowd.com/v0-test |
-| `main` | production          | No direct commits.<br>Pull requests only from `test`. | [#](https://us-east-1.console.aws.amazon.com/codesuite/codepipeline/pipelines/aws-api-codepipeline-prod/view) | https://api.veterancrowd.com/v0      |
+| Branch | Description         | Rules                                                 |                                                   Pipeline                                                    | Public Endpoint                    |
+| ------ | ------------------- | ----------------------------------------------------- | :-----------------------------------------------------------------------------------------------------------: | ---------------------------------- |
+| `dev`  | development trunk   | Direct commits & pull requests allowed.               |                                                     none                                                      | https://api.karmanivero.us/v0-dev  |
+| `test` | integration testing | No direct commits.<br>Pull requests only from `dev`.  | [#](https://us-east-1.console.aws.amazon.com/codesuite/codepipeline/pipelines/aws-api-codepipeline-test/view) | https://api.karmanivero.us/v0-test |
+| `main` | production          | No direct commits.<br>Pull requests only from `test`. | [#](https://us-east-1.console.aws.amazon.com/codesuite/codepipeline/pipelines/aws-api-codepipeline-prod/view) | https://api.karmanivero.us/v0      |
 
 To develop a feature, follow these steps:
 
@@ -230,15 +232,15 @@ TODO
 
 ## Secure Certificate
 
-Normally we would specify a certificate on `veterancrowd.com` and `*.veterancrowd.com` using the [`serverless-certificate-creator`](https://www.serverless.com/plugins/serverless-certificate-creator) plugin. The required entry in `serverless.yaml` would look like
+Normally we would specify a certificate on `karmanivero.us` and `*.karmanivero.us` using the [`serverless-certificate-creator`](https://www.serverless.com/plugins/serverless-certificate-creator) plugin. The required entry in `serverless.yaml` would look like
 
 ```yaml
 custom:
   customCertificate:
-    certificateName: 'veterancrowd.com'
-    hostedZoneNames: 'veterancrowd.com.'
+    certificateName: 'karmanivero.us'
+    hostedZoneNames: 'karmanivero.us.'
     subjectAlternativeNames:
-      - '*.veterancrowd.com'
+      - '*.karmanivero.us'
 ```
 
 The alternative name is currently creating an issue with this. It looks like the plugin is trying to submit duplicate validation records to the zone file, resulting in an error. The issue is documented in [this pull request](https://github.com/schwamster/serverless-certificate-creator/pull/55).

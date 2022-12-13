@@ -26,28 +26,28 @@ provider:
 
 custom:
   localhost: http://localhost:3000
-  rootDomain: veterancrowd.com
-  apiSubdomain: api
-  authSubdomain: auth2
+  rootDomain: karmanivero.us
+  apiSubdomain: aws-api
+  authSubdomain: aws-auth
+  webSubdomain: nextjs-template
 
-  authCallbackUrls:
-    - 'https://${self:custom.apiSubdomain}.${self:custom.rootDomain}/${self:custom.customDomain.basePath}/login'
-    - '${self:custom.localhost}/api/auth/callback/cognito'
-  authLogoutUrls:
-    - '${self:custom.localhost}'
-  certificateArn: arn:aws:acm:us-east-1:546652796775:certificate/a3487e96-b00d-4acc-95b4-20570e472332
+  certificateArn: arn:aws:acm:us-east-1:706896224302:certificate/4d8ec53b-1770-4042-8484-e8557f6937ee
   customDomain:
     domainName: ${self:custom.apiSubdomain}.${self:custom.rootDomain}
     basePath: ${self:custom.stage2ApiBasePath.${opt:stage, self:provider.stage}}
     certificateArn: ${self:custom.certificateArn}
-  stage2AuthSubdomain:
-    dev: ${self:custom.authSubdomain}-dev
-    prod: ${self:custom.authSubdomain}
-    test: ${self:custom.authSubdomain}-test
   stage2ApiBasePath:
     dev: 'v0-dev'
     prod: 'v0'
     test: 'v0-test'
+  stage2AuthSubdomain:
+    dev: ${self:custom.authSubdomain}-dev
+    prod: ${self:custom.authSubdomain}
+    test: ${self:custom.authSubdomain}-test
+  stage2WebSubdomain:
+    dev: ${self:custom.webSubdomain}-dev
+    prod: ${self:custom.webSubdomain}
+    test: ${self:custom.webSubdomain}-test
 
 functions:
   hello:
@@ -93,8 +93,8 @@ resources:
         UserPoolId: !Ref UserPool
         ProviderName: Google
         ProviderDetails:
-          client_id: '295049270448-sseqdpeulnadikp9j03q82g9108i1bea.apps.googleusercontent.com'
-          client_secret: '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'
+          client_id: '659306920886-048mbsh16caed33svsfear0cikqj04hv.apps.googleusercontent.com'
+          client_secret: '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'
           authorize_scopes: 'profile email openid'
         ProviderType: Google
         AttributeMapping:
@@ -110,10 +110,15 @@ resources:
           - email
           - openid
           - profile
-        CallbackURLs: ${self:custom.authCallbackUrls}
+        CallbackURLs:
+          - 'https://${self:custom.apiSubdomain}.${self:custom.rootDomain}/${self:custom.customDomain.basePath}/login'
+          - 'https://${self:custom.stage2WebSubdomain.${opt:stage, self:provider.stage}}.${self:custom.rootDomain}/api/auth/callback/cognito'
+          - '${self:custom.localhost}/api/auth/callback/cognito'
         ClientName: web-app
         GenerateSecret: true
-        LogoutURLs: ${self:custom.authLogoutUrls}
+        LogoutURLs:
+          - 'https://${self:custom.stage2WebSubdomain.${opt:stage, self:provider.stage}}.${self:custom.rootDomain}'
+          - '${self:custom.localhost}'
         SupportedIdentityProviders:
           - COGNITO
           - Google
