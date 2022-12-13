@@ -6,9 +6,9 @@ The API features both public and private endpoints, and is secured by a Cognito 
 
 This template can be deployed directly from the command line to multiple [AWS CloudFormation](https://aws.amazon.com/cloudformation/) stacks, each exposing an independent environment (e.g. `dev`, `test`, and `prod`), with its own authentication provider, at configurable endpoints. These endpoints will integrate with matching Next.js Template environments.
 
-If you integrate your code repository with [AWS CodePipeline](https://aws.amazon.com/codepipeline/), your code will automatically build and deploy following every push to the relevant branch. See [Setting Up CodePipeline](#setting-up-codepipeline) below for more info.
+If you integrate your code repository with [AWS CodePipeline](https://aws.amazon.com/codepipeline/), your code will automatically build and deploy following every push to the relevant branch. See [Automated Deployment](#automated-deployment) below for more info.
 
-> This template is in fact hooked into CodePipeline to support deployments to demo environments. Consequently you will see many references to the `karmanivero.us` domain. Obviously, you'll need to replace these with references to your own domain.
+This template is in fact hooked into CodePipeline to support deployments to demo environments. Consequently you will see many references to the `karmanivero.us` domain. Obviously, you'll need to replace these with references to your own domain.
 
 # The Stack
 
@@ -90,7 +90,7 @@ Rather than install Node.js directly, it is better to install it & manage versio
 
 [Click here](https://github.com/karmaniverous/aws-api-template/generate) to clone this template into your own GitHub account. Give it a name like `my-aws-api`.
 
-> **Are you cloning an existing repository?** No need to do this then.
+**Are you cloning an existing repository?** No need to do this then.
 
 ## Clone the Project Repository
 
@@ -108,7 +108,7 @@ If this is your first time opening the folder, you will be asked to install reco
 2. Enter `@recommended` into the search box
 3. Click the Download link.
 
-   <img src="readme-assets/recommended-extensions.png" width="250">
+   <img src="readme/recommended-extensions.png" width="250">
 
 Run the following command to install project dependencies:
 
@@ -127,7 +127,7 @@ Look for these files in your project directory:
 
 Copy each of these files and remove the `template` extension from the copy.
 
-> **Do not simply rename these files!** Anybody who pulls your repo will need these templates to create the same files in his own local environment.
+**Do not simply rename these files!** Anybody who pulls your repo will need these templates to create the same files in his own local environment.
 
 ## Connect to AWS
 
@@ -152,7 +152,15 @@ dotenv -c dev -- sls offline
 
 A local server should start with an endpoint at [`http://localhost:3000/v0-dev/hello`](http://localhost:3000/v0-dev/hello). If you navigate to this endpoint in a browser, you should see a blob of JSON with the message `Hello world!`
 
-# Setting Up CodePipeline
+# Deploying to AWS
+
+[TODO]
+
+## Manual Deployment
+
+[TODO]
+
+## Automated Deployment
 
 [TODO]
 
