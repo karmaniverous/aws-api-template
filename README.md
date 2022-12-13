@@ -147,13 +147,15 @@ Deleting a CloudFormation stack allows for a clean deployment of all stack resou
 
 To delete a stack, follow these instructions:
 
-1.  Find the API domain at [API Gateway Custom Domains](https://us-east-1.console.aws.amazon.com/apigateway/main/publish/domain-names). Delete all API mappings related to the stack.
+1. Find the API domain at [API Gateway Custom Domains](https://us-east-1.console.aws.amazon.com/apigateway/main/publish/domain-names). Delete all API mappings related to the stack.
 
-1.  Find the stack in the [CloudFormation console](https://console.aws.amazon.com/cloudformation) and click through to the stack detail.
+1. Find the stack in the [CloudFormation console](https://console.aws.amazon.com/cloudformation) and click through to the stack detail.
 
-1.  Under the Resources tab, find any S3 Buckets and delete their contents.
+1. Under the Resources tab, find any S3 Buckets and delete their contents.
 
-1.  Delete the stack.
+1. Delete the stack.
+
+1. Check the [Route 53 console](https://console.aws.amazon.com/route53) to validate that there are no remaining `A` or `AAAA` that point at subdomains associated with the deleted stack. Delete the records if they exist.
 
 # DevOps
 

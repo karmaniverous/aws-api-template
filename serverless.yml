@@ -1,4 +1,4 @@
-service: aws-api-template
+service: ${env:SERVICE_NAME}
 frameworkVersion: '3'
 
 plugins:
@@ -21,32 +21,24 @@ provider:
   name: aws
   region: us-east-1
   runtime: nodejs18.x
-  stage: dev
+  stage: ${env:STAGE}
   timeout: 5
 
-custom:
-  localhost: http://localhost:3000
-  apiSubdomain: aws-api-template
-  authSubdomain: aws-api-template-auth
-  webSubdomain: nextjs-template
+params:
+  default:
+    apiBasePath: ${env:API_VERSION}-${env:STAGE}
+    authSubdomain: ${env:AUTH_SUBDOMAIN}-${env:STAGE}
+    webSubdomain: ${env:WEB_SUBDOMAIN}-${env:STAGE}
+  prod:
+    apiBasePath: ${env:API_VERSION}
+    authSubdomain: ${env:AUTH_SUBDOMAIN}
+    webSubdomain: ${env:WEB_SUBDOMAIN}
 
-  certificateArn: arn:aws:acm:us-east-1:706896224302:certificate/4d8ec53b-1770-4042-8484-e8557f6937ee
+custom:
   customDomain:
-    domainName: ${self:custom.apiSubdomain}.${env:ROOT_DOMAIN}
-    basePath: ${self:custom.stage2ApiBasePath.${opt:stage, self:provider.stage}}
-    certificateArn: ${self:custom.certificateArn}
-  stage2ApiBasePath:
-    dev: 'v0-dev'
-    prod: 'v0'
-    test: 'v0-test'
-  stage2AuthSubdomain:
-    dev: ${self:custom.authSubdomain}-dev
-    prod: ${self:custom.authSubdomain}
-    test: ${self:custom.authSubdomain}-test
-  stage2WebSubdomain:
-    dev: ${self:custom.webSubdomain}-dev
-    prod: ${self:custom.webSubdomain}
-    test: ${self:custom.webSubdomain}-test
+    domainName: ${env:API_SUBDOMAIN}.${env:ROOT_DOMAIN}
+    basePath: ${param:apiBasePath}
+    certificateArn: ${env:CERTIFICATE_ARN}
 
 functions:
   hello:
@@ -84,7 +76,7 @@ resources:
             Required: true
         UsernameConfiguration:
           CaseSensitive: false
-        UserPoolName: ${self:service}-userpool-${opt:stage, self:provider.stage}
+        UserPoolName: ${env:SERVICE_NAME}-userpool-${env:STAGE}
 
     UserPoolIdentityProviderGoogle:
       Type: AWS::Cognito::UserPoolIdentityProvider
@@ -92,8 +84,8 @@ resources:
         UserPoolId: !Ref UserPool
         ProviderName: Google
         ProviderDetails:
-          client_id: '659306920886-048mbsh16caed33svsfear0cikqj04hv.apps.googleusercontent.com'
-          client_secret: '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'
+          client_id: '${env:GOOGLE_CLIENT_ID}'
+          client_secret: '${env:GOOGLE_CLIENT_SECRET}'
           authorize_scopes: 'profile email openid'
         ProviderType: Google
         AttributeMapping:
@@ -110,25 +102,24 @@ resources:
           - openid
           - profile
         CallbackURLs:
-          - 'https://${self:custom.apiSubdomain}.${env:ROOT_DOMAIN}/${self:custom.customDomain.basePath}/login'
-          - 'https://${self:custom.stage2WebSubdomain.${opt:stage, self:provider.stage}}.${env:ROOT_DOMAIN}/api/auth/callback/cognito'
-          - '${self:custom.localhost}/api/auth/callback/cognito'
+          - 'https://${param:webSubdomain}.${env:ROOT_DOMAIN}/api/auth/callback/cognito'
+          - 'http://localhost:${env:LOCALHOST_PORT}/api/auth/callback/cognito'
         ClientName: web-app
         GenerateSecret: true
         LogoutURLs:
-          - 'https://${self:custom.stage2WebSubdomain.${opt:stage, self:provider.stage}}.${env:ROOT_DOMAIN}'
-          - '${self:custom.localhost}'
+          - 'https://${param:webSubdomain}.${env:ROOT_DOMAIN}'
+          - 'http://localhost:${env:LOCALHOST_PORT}'
         SupportedIdentityProviders:
           - COGNITO
-          - Google
+          # - Google
         UserPoolId: !Ref UserPool
 
     UserPoolDomain:
       Type: AWS::Cognito::UserPoolDomain
       Properties:
         CustomDomainConfig:
-          CertificateArn: ${self:custom.certificateArn}
-        Domain: ${self:custom.stage2AuthSubdomain.${opt:stage, self:provider.stage}}.${env:ROOT_DOMAIN}
+          CertificateArn: ${env:CERTIFICATE_ARN}
+        Domain: ${param:authSubdomain}.${env:ROOT_DOMAIN}
         UserPoolId: !Ref UserPool
 
     UserPoolAlias:
@@ -136,7 +127,7 @@ resources:
       Properties:
         HostedZoneName: '${env:ROOT_DOMAIN}.'
         RecordSets:
-          - Name: ${self:custom.stage2AuthSubdomain.${opt:stage, self:provider.stage}}.${env:ROOT_DOMAIN}.
+          - Name: ${param:authSubdomain}.${env:ROOT_DOMAIN}.
             ResourceRecords:
               - !GetAtt UserPoolDomain.CloudFrontDistribution
             TTL: '300'
