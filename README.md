@@ -197,7 +197,7 @@ Follow these steps to prepare your AWS account to receive your deployment. Where
 
    If you're using a different front-end application, you'll have to edit [`serverless.yml`](./serverless.yml) accordingly. You can leave this alone for now and the application will still deploy properly!
 
-1. Your API Version factors into your various endpoints. This template uses semantic versioning, but for now this is loosely integrated. Your API version should be `v<major-version>`, so be default when you first pull this template it is 'v0`. If you are at a later major version, enter the appropriate value for environmental variable `API_VERSION`.
+1. Your API Version factors into your various endpoints. This template uses semantic versioning, but for now this is loosely integrated. Your API version should be `v<major-version>`, so be default when you first pull this template it is `v0`. If you are at a later major version, enter the appropriate value for environmental variable `API_VERSION`.
 
    [TODO] Pull API_VERSION directly from package version.
 
