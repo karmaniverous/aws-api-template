@@ -9,11 +9,9 @@ params:
   default:
     apiBasePath: ${env:API_VERSION}-${env:STAGE}
     authSubdomain: ${env:AUTH_SUBDOMAIN}-${env:API_VERSION}-${env:STAGE}
-    webSubdomain: ${env:WEB_SUBDOMAIN}-${env:STAGE}
   prod:
     apiBasePath: ${env:API_VERSION}
     authSubdomain: ${env:AUTH_SUBDOMAIN}-${env:API_VERSION}
-    webSubdomain: ${env:WEB_SUBDOMAIN}
 
 provider:
   apiGateway:
@@ -133,12 +131,14 @@ resources:
           - openid
           - profile
         CallbackURLs:
-          - 'https://${param:webSubdomain}.${env:ROOT_DOMAIN}/api/auth/callback/cognito'
+          - 'https://${env:WEB_SUBDOMAIN_PROD}.${env:ROOT_DOMAIN}/api/auth/callback/cognito'
+          - 'https://${env:WEB_SUBDOMAIN_PREVIEW}.${env:ROOT_DOMAIN}/api/auth/callback/cognito'
           - 'http://localhost:${env:WEB_LOCALHOST_PORT}/api/auth/callback/cognito'
         ClientName: web-app
         GenerateSecret: true
         LogoutURLs:
-          - 'https://${param:webSubdomain}.${env:ROOT_DOMAIN}'
+          - 'https://${env:WEB_SUBDOMAIN_PROD}.${env:ROOT_DOMAIN}'
+          - 'https://${env:WEB_SUBDOMAIN_PREVIEW}.${env:ROOT_DOMAIN}'
           - 'http://localhost:${env:WEB_LOCALHOST_PORT}'
         SupportedIdentityProviders:
           - COGNITO
