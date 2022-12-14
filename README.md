@@ -411,6 +411,14 @@ It's your project. Do what you want! But if you're interested, here's a rational
 
 Meanwhile template uses [semantic versioning](https://semver.org/). A new major version represents a breaking change, so with the release of a new major version, most organizations continue to maintain live endpoints for previous major versions.
 
+This means that as soon as a major version changes, all future deployments to a given stage should land on a new, version-specific stack. This is in fact the way this template operates: there is a unique CloudFormation stack for every unique combination of deployed `stage` and `api-version`.
+
+By default, this template expresses major version `v0`. Let's say you release a `v1` major version and push it to your `main` branch. This will create a new set of production endpoints that express the new version.
+
+It will _also_ create an independent Cognito User Pool on a unique set of endpoints. You may not want this! If there have been no breaking changes to your User Pool, you probably want to retain the user accounts created in the `v0` stack.
+
+To accomplish this, simply add the relevant Cognito User Pool ARN to environment variable `COGNITO_USER_POOL_ARN` in file `.env.<stage>`.
+
 This project's code repository features two protected branches: `main` and `test`. Commits to these branches trigger build processes that update public endpoints. They are configured as follows:
 
 | Branch | Description         | Rules                                                 |                                                   Pipeline                                                    | Public Endpoint                    |
@@ -483,6 +491,43 @@ The hosted UI creates calls the callback URL on login. This is the first half of
 TODO
 
 # Issues
+
+## `serverless.yml` Validation
+
+There is a conditional function on private API endpoints that selects authentication either by the Cognito User Pool created on the stack or by the ARN passed in via the `COGNITO_USER_POOL_ARN` environment variable. It looks like this:
+
+```yml
+secure-hello:
+  handler: api/secure/hello.get
+  description: GET /secure-hello
+  events:
+    - http:
+        path: secure-hello
+        method: get
+        cors: true
+        authorizer:
+        name: UserPoolAuthorizer
+        type: COGNITO_USER_POOLS
+        # *** CONDITIONAL ***
+        arn: !If
+          - CreateUserPool
+          - !GetAtt UserPool.Arn
+          - ${env:COGNITO_USER_POOL_ARN}
+        # *******************
+        claims:
+          - email
+```
+
+This is perfectly valid and works just fine, but the Serverless Framework issues the following warning on deployment:
+
+```text
+Warning: Invalid configuration encountered
+  at 'functions.secure-hello.events.0.http.authorizer.arn': unsupported object format
+
+Learn more about configuration validation here: http://slss.io/configuration-validation
+```
+
+You can ignore this warning.
 
 ## Secure Certificate
 
