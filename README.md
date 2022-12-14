@@ -236,7 +236,7 @@ The public base path of your API will depend on your settings, but will look lik
 https://<api-subdomain>.<root-domain>/v<major-version>[-<non-prod-stage>]
 ```
 
-To test your deployment, open your hello-world public endpoint in a browser, e.g. `https://aws-api-template.karmanivero.us/v0-dev/hello. You should see the following content:
+To test your deployment, open your hello-world public endpoint in a browser, e.g. `https://aws-api-template.karmanivero.us/v0-dev/hello`. You should see the following content:
 
 ```json
 {
