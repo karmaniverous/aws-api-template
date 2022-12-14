@@ -197,7 +197,7 @@ Follow these steps to prepare your AWS account to receive your deployment. Where
 
    If you're using a different front-end application, you'll have to edit [`serverless.yml`](./serverless.yml) accordingly. You can leave this alone for now and the application will still deploy properly!
 
-1. Your API Version factors into your various endpoints. This template uses semantic versioning, but for now this is loosely integrated. Your API version should be `v<major-version>`, so by default when you first pull this template it is `v0`. If you are at a later major version, enter the appropriate value for environmental variable `API_VERSION`.
+1. Your API Version factors into your various endpoints. This template uses [semantic versioning](https://semver.org/), but for now this is loosely integrated. Your API version should be `v<major-version>`, so by default when you first pull this template it is `v0`. If you are at a later major version, enter the appropriate value for environmental variable `API_VERSION`.
 
    [TODO] Pull `API_VERSION` directly from package version.
 
@@ -385,11 +385,31 @@ To delete a stack, follow these instructions:
 
 [TODO] Automate this process.
 
-# Adding Identity Providers
+# Some Thoughts About DevOps
 
-[TODO]
+It's your project. Do what you want! But if you're interested, here's a rational way to go about this...
 
-# DevOps
+- During the development process you're probably working in some feature branch & trying run your project locally. The corresponding command in our case is
+
+  ```
+  dotenv -c dev -- sls offline
+  ```
+
+  When this fails, you iterate until it doesn't.
+
+- Local builds only take you so far, and there are a ton of AWS services that can only exist remotely. So your next step is to try a remote 'dev' build using
+
+  ```
+  dotenv -c dev -- sls deploy --verbose
+  ```
+
+  The same thing will happen when you merge your feature branch with the `dev` branch.
+
+- This will often fail catastrophically and require you to delete the `dev` stack & start over. Once it doesn't—and assuming all your other tests pass—you can deploy the stable build to your `test` stage for integration testing simply by merging your `dev` branch into `test`.
+
+- Once your integration tests pass, you can deploy the new feature into production by merging your `test` branch into `main`.
+
+Meanwhile template uses [semantic versioning](https://semver.org/). A new major version represents a breaking change, so with the release of a new major version, most organizations continue to maintain live endpoints for previous major versions.
 
 This project's code repository features two protected branches: `main` and `test`. Commits to these branches trigger build processes that update public endpoints. They are configured as follows:
 
