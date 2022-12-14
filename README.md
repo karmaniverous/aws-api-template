@@ -181,11 +181,11 @@ Follow these steps to prepare your AWS account to receive your deployment. Where
 
 1. Choose a root domain (e.g. `mydomain.com`) and host its DNS at [AWS Route53](https://aws.amazon.com/route53/). Enter your root domain for environmental variable `ROOT_DOMAIN`.
 
-1. Request & validate a certificate from the [ACM Console](https://console.aws.amazon.com/acm) that covers domains `mydomain.com` and `*.mydomain.com`. Enter the certificate ARN for environmental variable `CERTIFICATE_ARN`.
+1. Request & validate a certificate from the [ACM Console](https://us-east-1.console.aws.amazon.com/acm) that covers domains `mydomain.com` and `*.mydomain.com`. Enter the certificate ARN for environmental variable `CERTIFICATE_ARN`.
 
-1. Choose an API subdomain. All of your APIs will be exposed at `<api-subdomain>.<root-domain>`. **Double-check your [Route 53](https://console.aws.amazon.com/route53) zone file to make sure it isn't already assigned to some other service!** Enter your API subdomain for environmental variable `API_SUBDOMAIN`.
+1. Choose an API subdomain. All of your APIs will be exposed at `<api-subdomain>.<root-domain>`. **Double-check your [Route 53](https://us-east-1.console.aws.amazon.com/route53) zone file to make sure it isn't already assigned to some other service!** Enter your API subdomain for environmental variable `API_SUBDOMAIN`.
 
-1. Choose an authorization subdomain. Your authorization endpoints will be at `<auth-subdomain>.<root-domain>` and `<auth-subdomain>-<stage>.<root-domain>`. **Double-check your [Route 53](https://console.aws.amazon.com/route53) zone file to make sure these aren't already assigned to some other service!** Enter your authorization subdomain for environmental variable `AUTH_SUBDOMAIN`.
+1. Choose an authorization subdomain. Your authorization endpoints will be at `<auth-subdomain>.<root-domain>` and `<auth-subdomain>-<stage>.<root-domain>`. **Double-check your [Route 53](https://us-east-1.console.aws.amazon.com/route53) zone file to make sure these aren't already assigned to some other service!** Enter your authorization subdomain for environmental variable `AUTH_SUBDOMAIN`.
 
 1. The template assumes your Cognito Authorization UI will be integrated with a web application at a subdomain of the same root domain (e.g. my [Next.js Template](https://github.com/karmaniverous/nextjs-template)).
 
@@ -197,9 +197,9 @@ Follow these steps to prepare your AWS account to receive your deployment. Where
 
    If you're using a different front-end application, you'll have to edit [`serverless.yml`](./serverless.yml) accordingly. You can leave this alone for now and the application will still deploy properly!
 
-1. Your API Version factors into your various endpoints. This template uses semantic versioning, but for now this is loosely integrated. Your API version should be `v<major-version>`, so be default when you first pull this template it is `v0`. If you are at a later major version, enter the appropriate value for environmental variable `API_VERSION`.
+1. Your API Version factors into your various endpoints. This template uses semantic versioning, but for now this is loosely integrated. Your API version should be `v<major-version>`, so by default when you first pull this template it is `v0`. If you are at a later major version, enter the appropriate value for environmental variable `API_VERSION`.
 
-   [TODO] Pull API_VERSION directly from package version.
+   [TODO] Pull `API_VERSION` directly from package version.
 
 1. Run the following command to create an API Gateway custom domain at `<api-subdomain>.<root-domain>`.
 
@@ -252,58 +252,42 @@ To test your deployment, open your hello-world public endpoint in a browser, e.g
 
 ## Automated Deployment
 
-[TODO]
+An [AWS CodePipeline](https://aws.amazon.com/codepipeline/) watches a code repository branch (e.g. at GitHub). When it detects a change, it...
 
-# Adding Identity Providers
+1. Imports the code to an [AWS S3](https://aws.amazon.com/s3/) bucket.
+1. Launches an [AWS CodeBuild](https://aws.amazon.com/codebuild/) project that...
+   1. Allocates a virtual machine & imports the code repository.
+   1. Loads all supporting applications (e.g. the Serverless Framework) and project dependencies.
+   1. Deploys the designated stage, _exactly as you would do from your desktop!_
+   1. Preserves the logs and deallocates the virtual machine.
 
-[TODO]
+The CodeBuild process is driven by [`buildspec.yml`](./buildspec.yml).
 
-# Building From Scratch
+## Deleting a Stack
 
-To generate all AWS resources from scratch, follow these steps:
+Every Stage you deploy to AWS generates & updates its own [CloudFormation stack](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html), which contains all of the resources associated with the Stage.
 
-1. Request & validate a certificate from the [ACM Console](https://us-east-1.console.aws.amazon.com/acm/home#/certificates/list) that covers domains `karmanivero.us` and `*.karmanivero.us`. Copy the certificate ARN and paste it into `serverless.yml` at `custom.certificateArn`.
+Some resources have properties that can only be set at create time (e.g. [Cognito User Pool AliasAttributes](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cognito-userpool.html#cfn-cognito-userpool-aliasattributes)). If you wish to change such a property, and if you will not unduly impact current users, the easiest option by far is to delete the entire stack and recreate it with the next deployment.
 
-1. Run the following command to create an API Gateway custom domain at `aws-api.karmanivero.us`.
+As you edit your stack configuration during the development process, your stack might also simply become unstable and stop accepting new deployments. Deleting the stack is often an efficient way to recover from a configuration error and get things moving again.
 
-   ```bash
-   sls create_domain --aws-profile <profile name>
-   ```
-
-1. Run the following command to deploy to the `dev` stack:
-
-   ```bash
-   sls deploy --aws-profile <profile name>
-   ```
-
-1. If the `dev` stack deployment succeeds, run the following commands to deploy to the `test` & `prod` stacks:
-
-   ```bash
-   sls deploy -s test --aws-profile <profile name>
-   sls deploy -s prod --aws-profile <profile name>
-   ```
-
-# Creating a New Stage
-
-TODO
-
-# Deleting a Stack
-
-Deleting a CloudFormation stack allows for a clean deployment of all stack resources to AWS.
-
-> **Use with extreme caution!** Stack deletion will also eliminate all users from the related user pool!
+**Use with extreme caution!** Stack deletion will also eliminate all user accounts the related user pool!
 
 To delete a stack, follow these instructions:
 
-1. Find the API domain at [API Gateway Custom Domains](https://us-east-1.console.aws.amazon.com/apigateway/main/publish/domain-names). Delete all API mappings related to the stack.
+1. Find your API subdomain at [API Gateway Custom Domains](https://us-east-1.console.aws.amazon.com/apigateway/main/publish/domain-names). Delete all API mappings related to the stack.
 
-1. Find the stack in the [CloudFormation console](https://console.aws.amazon.com/cloudformation) and click through to the stack detail.
+1. Find the stack in the [CloudFormation console](https://us-east-1.console.aws.amazon.com/cloudformation) and click through to the stack detail.
 
 1. Under the Resources tab, find any S3 Buckets and delete their contents.
 
 1. Delete the stack.
 
-1. Check the [Route 53 console](https://console.aws.amazon.com/route53) to validate that there are no remaining `A` or `AAAA` that point at subdomains associated with the deleted stack. Delete the records if they exist.
+[TODO] Automate this process.
+
+# Adding Identity Providers
+
+[TODO]
 
 # DevOps
 
