@@ -104,12 +104,12 @@ resources:
           - profile
         CallbackURLs:
           - 'https://${param:webSubdomain}.${env:ROOT_DOMAIN}/api/auth/callback/cognito'
-          - 'http://localhost:${env:LOCALHOST_PORT}/api/auth/callback/cognito'
+          - 'http://localhost:${env:WEB_LOCALHOST_PORT}/api/auth/callback/cognito'
         ClientName: web-app
         GenerateSecret: true
         LogoutURLs:
           - 'https://${param:webSubdomain}.${env:ROOT_DOMAIN}'
-          - 'http://localhost:${env:LOCALHOST_PORT}'
+          - 'http://localhost:${env:WEB_LOCALHOST_PORT}'
         SupportedIdentityProviders:
           - COGNITO
           # - Google

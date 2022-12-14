@@ -189,11 +189,13 @@ Follow these steps to prepare your AWS account to receive your deployment. Where
 
 1. The template assumes your Cognito Authorization UI will be integrated with a web application at a subdomain of the same root domain (e.g. my [Next.js Template](https://github.com/karmaniverous/nextjs-template)).
 
-   If you're using a different application, you'll have to edit [`serverless.yml`](./serverless.yml) accordingly. You can leave this alone for now and the application will still deploy properly!
-
    Enter the web application subdomain for environmental variable `WEB_SUBDOMAIN`.
 
    [TODO] Support web apps at root domain, i.e. `WEB_SUBDOMAIN` blank.
+
+   For local testing, enter the web application's `localhost` port for environmental variable `WEB_LOCALHOST_PORT`.
+
+   If you're using a different front-end application, you'll have to edit [`serverless.yml`](./serverless.yml) accordingly. You can leave this alone for now and the application will still deploy properly!
 
 1. Run the following command to create an API Gateway custom domain at `<api-subdomain>.<root-domain>`.
 
@@ -236,7 +238,7 @@ The public base path of your API will depend on your settings, but will look lik
 https://<api-subdomain>.<root-domain>/v<major-version>[-<non-prod-stage>]
 ```
 
-To test your deployment, open your hello-world public endpoint in a browser, e.g. `https://aws-api-template.karmanivero.us/v0-dev/hello`. You should see the following content:
+To test your deployment, open your hello-world public endpoint in a browser, e.g. [`https://aws-api-template.karmanivero.us/v0-dev/hello`](https://aws-api-template.karmanivero.us/v0-dev/hello). You should see the following content:
 
 ```json
 {
