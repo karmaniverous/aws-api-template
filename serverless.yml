@@ -31,6 +31,7 @@ provider:
   name: aws
   region: us-east-1
   runtime: nodejs18.x
+  stackName: ${env:SERVICE_NAME}-${env:API_VERSION}-${env:STAGE}
   stage: ${env:STAGE}
   timeout: 5
 
