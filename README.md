@@ -261,7 +261,107 @@ An [AWS CodePipeline](https://aws.amazon.com/codepipeline/) watches a code repos
    1. Deploys the designated stage, _exactly as you would do from your desktop!_
    1. Preserves the logs and deallocates the virtual machine.
 
+There is one CodePipeline for eached watched branch, each corresponding a deployment Stage. All of them call the same CodeBuild project. Each CodePipeline is manually configured with a small set of environmental variables, which it injects into the CodeBuild project. These are the environment secrets contained in each `.env.<stage>.local` file, which are blocked by `.gitignore` and are never pushed to the code repository.
+
 The CodeBuild process is driven by [`buildspec.yml`](./buildspec.yml).
+
+The following sections describe how to set up your CodePipelines at AWS. If you are plugging into an ongoing project, these should already be in place.
+
+### Creating Your First CodePipeline
+
+Your first pipeline in this project is significant because you will also need to create the associated CodeBuild project and maybe also associated service roles. Let's tackle all of this in reverse order.
+
+#### Create a CodeBuild Service Role
+
+When you create your CodeBuild project, you have the option of allowing AWS to create & manage associated a service role for you. This can get complicated fast, because you have to trust that AWS will be smart enough to figure out what policies to assign to this role as your project requirements change. If it isn't, your deployments will fail in ways that are hard to troubleshoot.
+
+Since all of this is purely internal to your AWS account, I suggest you create AWS service role `codebuild-service` for the CodeBuild use case. Assign the `AdministratorAccess` policy.
+
+Real AWS administrators are probably breaking out into hives right now, but you'll thank me.
+
+#### Create Your Pipeline
+
+If you are building this from scratch, you are probably operating from your `main` branch, which you will want to associate with your `prod` stage. Let's proceed on that assumption.
+
+**Before you begin...** Your pipeline will pull your repo and start a build as soon as it is created! Commit all of your local changes and push your commits to GitHub.
+
+From your [Pipelines Dashboard](https://us-east-1.console.aws.amazon.com/codesuite/codepipeline/pipelines), create a new pipeline.
+
+**Step 1: Choose Pipeline Settings**
+
+1. Give the pipeline a name that reflects both the project and your stage: `<service-name>-<stage>`
+
+1. We will allow CodePipeline to create a service role for us, and then we will use it in all future pipelines. The arguments against this for CodeBuild don't apply here because the CodePipeline role will always need the _same_ access. Call the new role `codepipeline-service`.
+
+1. Under Advanced Settings, choose all defaults.
+
+**Step 2: Add Source Stage**
+
+This is where CodePipeline gets its code. The instructions below assume you use GitHub.
+
+1. Choose a provider. If you use GitHub, choose _GitHub (Version 2)_. Otherwise, work it out.
+
+1. Choose an existing GitHub connection or create a new one. Note that if your code is in an Organization repo, Connections are Organization-specific.
+
+1. Choose your repository & branch. In this example we are using `main`.
+
+1. Leave any other defaults & click _Next_.
+
+**Step 3: Add Build Stage**
+
+1. Choose _AWS CodeBuild_ as your build provider.
+
+1. Since this is our first pipeline for this project, we will need to create a CodeBuild project. Click the _Create Project_ button. A popup will appear and take you to a build project creation dialogue. In this dialogue...
+
+   1. Choose a project name that will be consistent across the project: `<service-name>`
+
+   1. Use a Managed Image with the following settings:
+
+      - Operating System: _Ubuntu_
+      - Runtime: _Standard_
+      - Image: _highest version, currently `aws/codebuild/standard:6.0`_
+
+   1. Use an existing service role and choose the `codebuild-service` role we created earlier.
+
+   1. At the bottom of the dialogue, click _Continue to CodePipeline_.
+
+1. Back in the CodePipeline window, use the _Add environment variable_ button to add the contents of `.env.<stage>.local`. **These variable names & values are case-sensitive!**
+
+   Since this is your first time through, you probably haven't populated any OAUTH client secrets (e.g. `GOOGLE_CLIENT_SECRET`). If so, just add those variables as placeholders and leave them blank.
+
+1. Click _Next_.
+
+**Step 4: Add Deploy Stage**
+
+We're the Serverless Framework to deploy from [`buildspec.yml`](./buildspec.yml), so click the _Skip deploy stage_ button & confirm.
+
+**Step 5: Review**
+
+Review your settings & click _Create pipeline_. The new pipeline will immediately display a UI, pull your repo, and commence a build.
+
+### Creating Your Next CodePipeline
+
+Once you have an operating CodePipeline, creating the next one is easy! Just follow these steps:
+
+1. You can deploy any stage from any code branch, but when you create a pipeline you have to choose which branch to watch and which stage to deploy from it. Make sure the branch you choose has corresponsing `.env.<stage>` & `.env.<stage>.local` files in your repository with environment variables correctly populated.
+
+1. Create the new branch (e.g. `dev` or `test`) and push it to your remote repository.
+
+1. Choose an existing pipeline from the same project on your [Pipelines Dashboard](https://us-east-1.console.aws.amazon.com/codesuite/codepipeline/pipelines), click into it, and click the _Clone pipeline_ button.
+
+1. Choose a pipeline name that follows your established naming pattern: `<service-name>-<stage>`
+
+1. Choose an existing service role and pick the CodePipeline service role we created earlier (e.g. `codepipeline-service`).
+
+1. Choose all other defaults and click the _Clone_ button.
+
+1. Once the pipeline is created, click the _Edit_ button.
+
+1. Edit the _Source_ pipeline stage, edit the _Source_ action, and change the _Branch name_ to your selected repo branch. Click _Done_ on the popup and the _Source_ pipeline stage.
+
+1. Edit the _Build_ pipeline stage, edit the _Build_ action, and change the environment variable values to match the `.env.<stage>.local` file corresponding to the new pipeline's target Stage. Click _Done_ on the popup and the _Build_ pipeline stage.
+
+1. Click the _Save_ button to save the pipeline changes and then click the _Release change_ button to run the pipeline in its new configuration. It will pull your code from the new branch and commence a build.
 
 ## Deleting a Stack
 
