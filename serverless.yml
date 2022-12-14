@@ -5,6 +5,16 @@ plugins:
   - serverless-domain-manager
   - serverless-offline
 
+params:
+  default:
+    apiBasePath: ${env:API_VERSION}-${env:STAGE}
+    authSubdomain: ${env:AUTH_SUBDOMAIN}-${env:STAGE}
+    webSubdomain: ${env:WEB_SUBDOMAIN}-${env:STAGE}
+  prod:
+    apiBasePath: ${env:API_VERSION}
+    authSubdomain: ${env:AUTH_SUBDOMAIN}
+    webSubdomain: ${env:WEB_SUBDOMAIN}
+
 provider:
   endpointType: EDGE
   environment:
@@ -23,16 +33,6 @@ provider:
   runtime: nodejs18.x
   stage: ${env:STAGE}
   timeout: 5
-
-params:
-  default:
-    apiBasePath: ${env:API_VERSION}-${env:STAGE}
-    authSubdomain: ${env:AUTH_SUBDOMAIN}-${env:STAGE}
-    webSubdomain: ${env:WEB_SUBDOMAIN}-${env:STAGE}
-  prod:
-    apiBasePath: ${env:API_VERSION}
-    authSubdomain: ${env:AUTH_SUBDOMAIN}
-    webSubdomain: ${env:WEB_SUBDOMAIN}
 
 custom:
   customDomain:
