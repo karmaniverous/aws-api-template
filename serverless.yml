@@ -5,34 +5,36 @@ plugins:
   - serverless-domain-manager
   - serverless-offline
 
+params:
+  default:
+    apiBasePath: ${env:API_VERSION}-${env:STAGE}
+    authSubdomain: ${env:AUTH_SUBDOMAIN}-${env:API_VERSION}-${env:STAGE}
+  prod:
+    apiBasePath: ${env:API_VERSION}
+    authSubdomain: ${env:AUTH_SUBDOMAIN}-${env:API_VERSION}
+
 provider:
+  apiGateway:
+    disableDefaultEndpoint: true
+  apiName: ${self:provider.stackName}
   endpointType: EDGE
-  environment:
-    user_pool_id: { Ref: UserPool }
-    client_id: { Ref: UserClient }
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - cognito-idp:AdminInitiateAuth
-        - cognito-idp:AdminCreateUser
-        - cognito-idp:AdminSetUserPassword
-      Resource: '*'
+  iam:
+    role:
+      # name:
+      statements:
+        - Effect: Allow
+          Action:
+            - cognito-idp:AdminInitiateAuth
+            - cognito-idp:AdminCreateUser
+            - cognito-idp:AdminSetUserPassword
+          Resource: '*'
   memorySize: 128
   name: aws
   region: us-east-1
   runtime: nodejs18.x
-  stage: ${env:STAGE}
+  stackName: ${env:SERVICE_NAME}-${env:API_VERSION}-${env:STAGE}
+  stage: ${env:API_VERSION}-${env:STAGE}
   timeout: 5
-
-params:
-  default:
-    apiBasePath: ${env:API_VERSION}-${env:STAGE}
-    authSubdomain: ${env:AUTH_SUBDOMAIN}-${env:STAGE}
-    webSubdomain: ${env:WEB_SUBDOMAIN}-${env:STAGE}
-  prod:
-    apiBasePath: ${env:API_VERSION}
-    authSubdomain: ${env:AUTH_SUBDOMAIN}
-    webSubdomain: ${env:WEB_SUBDOMAIN}
 
 custom:
   customDomain:
@@ -49,6 +51,7 @@ functions:
           path: hello
           method: get
           cors: true
+    # name: ${self:provider.stage}
 
   secure-hello:
     handler: api/secure/hello.get
@@ -61,14 +64,37 @@ functions:
           authorizer:
             name: UserPoolAuthorizer
             type: COGNITO_USER_POOLS
-            arn: !GetAtt UserPool.Arn
+            arn: !If
+              - CreateUserPool
+              - !GetAtt UserPool.Arn
+              - ${env:COGNITO_USER_POOL_ARN}
             claims:
               - email
 
 resources:
+  Conditions:
+    CreateUserPool: !Equals ['${env:COGNITO_USER_POOL_ARN}', '*']
+    CreateIdentityProviderGoogle: !And
+      - !Condition CreateUserPool
+      - !Not
+        - !Or
+          - !Equals ['${env:GOOGLE_CLIENT_ID}', '*']
+          - !Equals ['${env:GOOGLE_CLIENT_SECRET}', '*']
+
   Resources:
+    GatewayResponseDefault4XX:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
+
     UserPool:
       Type: AWS::Cognito::UserPool
+      Condition: CreateUserPool
       Properties:
         AutoVerifiedAttributes: ['email']
         Schema:
@@ -77,10 +103,11 @@ resources:
             Required: true
         UsernameConfiguration:
           CaseSensitive: false
-        UserPoolName: ${env:SERVICE_NAME}-userpool-${env:STAGE}
+        UserPoolName: ${self:provider.stackName}
 
     UserPoolIdentityProviderGoogle:
       Type: AWS::Cognito::UserPoolIdentityProvider
+      Condition: CreateIdentityProviderGoogle
       Properties:
         UserPoolId: !Ref UserPool
         ProviderName: Google
@@ -94,6 +121,7 @@ resources:
 
     UserClient:
       Type: AWS::Cognito::UserPoolClient
+      Condition: CreateUserPool
       Properties:
         AllowedOAuthFlows:
           - code
@@ -103,20 +131,26 @@ resources:
           - openid
           - profile
         CallbackURLs:
-          - 'https://${param:webSubdomain}.${env:ROOT_DOMAIN}/api/auth/callback/cognito'
-          - 'http://localhost:${env:LOCALHOST_PORT}/api/auth/callback/cognito'
+          - 'https://${env:WEB_SUBDOMAIN_PROD}.${env:ROOT_DOMAIN}/api/auth/callback/cognito'
+          - 'https://${env:WEB_SUBDOMAIN_PREVIEW}.${env:ROOT_DOMAIN}/api/auth/callback/cognito'
+          - 'http://localhost:${env:WEB_LOCALHOST_PORT}/api/auth/callback/cognito'
         ClientName: web-app
         GenerateSecret: true
         LogoutURLs:
-          - 'https://${param:webSubdomain}.${env:ROOT_DOMAIN}'
-          - 'http://localhost:${env:LOCALHOST_PORT}'
+          - 'https://${env:WEB_SUBDOMAIN_PROD}.${env:ROOT_DOMAIN}'
+          - 'https://${env:WEB_SUBDOMAIN_PREVIEW}.${env:ROOT_DOMAIN}'
+          - 'http://localhost:${env:WEB_LOCALHOST_PORT}'
         SupportedIdentityProviders:
           - COGNITO
-          # - Google
+          - !If
+            - CreateIdentityProviderGoogle
+            - Google
+            - Ref: AWS::NoValue
         UserPoolId: !Ref UserPool
 
     UserPoolDomain:
       Type: AWS::Cognito::UserPoolDomain
+      Condition: CreateUserPool
       Properties:
         CustomDomainConfig:
           CertificateArn: ${env:CERTIFICATE_ARN}
@@ -125,6 +159,7 @@ resources:
 
     UserPoolAlias:
       Type: AWS::Route53::RecordSetGroup
+      Condition: CreateUserPool
       Properties:
         HostedZoneName: '${env:ROOT_DOMAIN}.'
         RecordSets:
@@ -133,13 +168,3 @@ resources:
               - !GetAtt UserPoolDomain.CloudFrontDistribution
             TTL: '300'
             Type: CNAME
-
-    GatewayResponseDefault4XX:
-      Type: 'AWS::ApiGateway::GatewayResponse'
-      Properties:
-        ResponseParameters:
-          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
-        ResponseType: DEFAULT_4XX
-        RestApiId:
-          Ref: 'ApiGatewayRestApi'
