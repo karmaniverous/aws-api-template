@@ -8,17 +8,17 @@ The API features both public and private endpoints, and is secured by a Cognito 
 
 The template is highly configurable. You should be able to get it up and running on your own domain, in your own infrastructure, with edits to nothing but environment variables.
 
-This template can be deployed directly from the command line to multiple [AWS CloudFormation](https://aws.amazon.com/cloudformation/) stacks, each exposing an independent environment (e.g. `dev`, `test`, and `prod`), with its own authentication provider, at configurable endpoints. These endpoints will integrate with matching Next.js Template environments.
+This template can be deployed directly from the command line to multiple [AWS CloudFormation](https://aws.amazon.com/cloudformation/) Stacks, each exposing an independent environment (e.g. `dev`, `test`, and `prod`), with its own authentication provider, at configurable endpoints.
 
-Version control is built in. Every major release triggers the deployment of an independent stack on every environment in order to maintain backward compatibility for your users. There is a provision to share key resources across stacks so you can bring your users with you across major versions.
+Backwards compatibility is built in. Every major release triggers the deployment of an independent Stack on every environment. There is a provision to share key resources across Stacks so you can bring your users with you across major versions.
 
-If you integrate your code repository with [AWS CodePipeline](https://aws.amazon.com/codepipeline/), your code will automatically build and deploy following every push to the relevant branch. See [Automated Deployment](#automated-deployment) below for more info.
+If you integrate your code repository with [AWS CodePipeline](https://aws.amazon.com/codepipeline/), your code will automatically build and deploy the relevant Stack following every push to the relevant branch. See [Automated Deployment](#automated-deployment) below for more info.
 
 This template is in fact hooked into CodePipeline to support deployments to demo environments. Consequently you will see many references to the `karmanivero.us` domain. Obviously, you'll need to replace these with references to your own domain.
 
-# The Stack
+# The Tech Stack
 
-This template represents a specific solution to a bunch of specific problems. It makes a number of highly opinionated choices. Here are some of them:
+This template represents a specific solution to a bunch of specific problems. It makes a number of highly opinionated choices.
 
 ## Node.js & ES6
 
