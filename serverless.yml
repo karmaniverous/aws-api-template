@@ -7,11 +7,11 @@ plugins:
 
 params:
   default:
-    apiBasePath: ${env:API_VERSION}-${env:STAGE}
-    authSubdomain: ${env:AUTH_SUBDOMAIN}-${env:API_VERSION}-${env:STAGE}
+    apiBasePath: ${env:API_VERSION}-${env:ENV}
+    authSubdomain: ${env:AUTH_SUBDOMAIN_TOKEN}-${env:API_VERSION}-${env:ENV}
   prod:
     apiBasePath: ${env:API_VERSION}
-    authSubdomain: ${env:AUTH_SUBDOMAIN}-${env:API_VERSION}
+    authSubdomain: ${env:AUTH_SUBDOMAIN_TOKEN}-${env:API_VERSION}
 
 provider:
   apiGateway:
@@ -32,8 +32,8 @@ provider:
   name: aws
   region: us-east-1
   runtime: nodejs18.x
-  stackName: ${env:SERVICE_NAME}-${env:API_VERSION}-${env:STAGE}
-  stage: ${env:API_VERSION}-${env:STAGE}
+  stackName: ${env:SERVICE_NAME}-${env:API_VERSION}-${env:ENV}
+  stage: ${env:API_VERSION}-${env:ENV}
   timeout: 5
 
 custom:
@@ -51,7 +51,6 @@ functions:
           path: hello
           method: get
           cors: true
-    # name: ${self:provider.stage}
 
   secure-hello:
     handler: api/secure/hello.get
@@ -131,12 +130,14 @@ resources:
           - openid
           - profile
         CallbackURLs:
+          - 'https://${env:ROOT_DOMAIN}/api/auth/callback/cognito'
           - 'https://${env:WEB_SUBDOMAIN_PROD}.${env:ROOT_DOMAIN}/api/auth/callback/cognito'
           - 'https://${env:WEB_SUBDOMAIN_PREVIEW}.${env:ROOT_DOMAIN}/api/auth/callback/cognito'
           - 'http://localhost:${env:WEB_LOCALHOST_PORT}/api/auth/callback/cognito'
         ClientName: web-app
         GenerateSecret: true
         LogoutURLs:
+          - 'https://${env:ROOT_DOMAIN}'
           - 'https://${env:WEB_SUBDOMAIN_PROD}.${env:ROOT_DOMAIN}'
           - 'https://${env:WEB_SUBDOMAIN_PREVIEW}.${env:ROOT_DOMAIN}'
           - 'http://localhost:${env:WEB_LOCALHOST_PORT}'
