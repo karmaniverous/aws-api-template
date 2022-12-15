@@ -198,6 +198,12 @@ If you use GitLab, follow [these instructions](https://github.com/release-it/rel
 
 For other release control systems, consult the [`release-it` README](https://github.com/release-it/release-it#readme).
 
+You can now publish a release to GitHub with this command:
+
+```
+npm run release
+```
+
 ## Connect to AWS
 
 You will need to connect to AWS in order to interact with AWS resources during development.
