@@ -86,7 +86,7 @@ This template supports automated release management with [`release-it`](https://
 
 Releases are numbered according to [Semantic Versioning](https://www.geeksforgeeks.org/introduction-semantic-versioning/), and every release generates a release page at GitHub with release notes composed of your commit comments since the last release.
 
-In the near future (see [this issue](./issues/10)), the template will pick up on your major version number to populate API Version, which is a factor driving Stack creation. See [Environments, API Versions, Stages & Stacks](#environments-api-versions-stages--stacks) above for more info.
+In the near future (see [this issue](/issues/10)), the template will pick up on your major version number to populate API Version, which is a factor driving Stack creation. See [Environments, API Versions, Stages & Stacks](#environments-api-versions-stages--stacks) above for more info.
 
 Meanwhile, you'll need to populate the `API_VERSION` environment variable manually in [`.env`](./.env).
 
