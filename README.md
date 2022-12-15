@@ -46,7 +46,7 @@ Worth noting that I tried & rejected these three key Serverless Framework plugin
 - [`serverless-dotenv-plugin`](https://www.serverless.com/plugins/serverless-dotenv-plugin)
 - [`serverless-plugin-ifelse`](https://www.serverless.com/plugins/serverless-plugin-ifelse)
 
-The necessary functions are in the template; I just found better ways of getting there.
+The necessary functionality is in the template; I just found better ways of getting there.
 
 ## Environments, API Versions, Stages & Stacks
 
@@ -58,13 +58,13 @@ Some key definitions:
 
 - An **API Version** is a distinct [major version](https://www.geeksforgeeks.org/introduction-semantic-versioning/) of your project. Major versions introduce breaking changes, so when you bump your major version, you want to keep your previous versions operating to support backward compatibility. This project defaults in API Version `v0`; subsequent values would be `v1`, `v2`, and so on.
 
-- **Stage** relates specifically to [AWS API Gateway](https://aws.amazon.com/api-gateway/). API Gateway supports multiple "environments" and "versions" (see above) on a single API Gateway instance. We will deploy each environment version to its _own_ API Gateway, so only one Stage each. This is normally a key term in Serverless deployments, but the template handles Stage construction for you, so I'll try to use this term as little as possible in this document to avoid confusion. Examples of Stages are `aws-api-template-v0-dev`, `aws-api-template-v1-prod`, and so on.
+- **Stage** relates specifically to [AWS API Gateway](https://aws.amazon.com/api-gateway/). API Gateway supports multiple "environments" and "versions" (see above) on a single API Gateway instance. We will deploy each environment version to its _own_ API Gateway, so only one Stage each. This is normally a key term in Serverless deployments, but this template handles Stage construction for you, so I'll try to use this term as little as possible in this document to avoid confusion. Examples of Stages are `aws-api-template-v0-dev`, `aws-api-template-v1-prod`, and so on.
 
 - When you deploy a specific API Version into a specific Environment, this template creates a completely independent [CloudFormation stack](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html). A **Stack** contains all of the resources associated with that deployment, which may be updated in future deployments to the same Stack. Examples of Stacks are `aws-api-template-v0-dev`, `aws-api-template-v1-prod`, and so on. Stages and Stacks are PHYSICALLY very different, but LOGICALLY equivalent. To avoid confusion, in this document I will refer to Stacks rather than Stages wherever possible.
 
 ## Project Configuration
 
-This template is intended to deploy to multiple Environments across multiple API Versions in a highly configurable fashion. Both the project as a whole and individual environments include _secrets:_ configurations that need to exist in your dev environment to support local testing and manual deployment, but should NOT be pushed to your code repository.
+This template deploys multiple Environments across multiple API Versions in a highly configurable fashion. Both the project as a whole and individual environments include _secrets:_ configurations that need to exist in your dev environment to support local testing and manual deployment, but should NOT be pushed to your code repository.
 
 The key AWS configuration file in the project is [`serverless.yml`](./serverless.yml). Nominally this file would contain most of this stuff, but I thought it would be a good idea to abstract configuration data away from this highly structured file.
 
