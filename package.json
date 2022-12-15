@@ -1,14 +1,17 @@
 {
-  "name": "template-aws-api",
+  "name": "@karmaniverous/aws-api-template",
   "version": "0.0.0",
   "description": "",
   "main": "index.js",
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "release": "dotenv -- npx release-it"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "release-it": "^15.5.1",
     "serverless-domain-manager": "^6.2.1",
     "serverless-offline": "^11.6.0"
   },
@@ -17,5 +20,13 @@
     "@middy/http-cors": "^4.0.4",
     "@middy/http-error-handler": "^4.0.4",
     "aws-sdk": "^2.1271.0"
+  },
+  "release-it": {
+    "github": {
+      "release": true
+    },
+    "npm": {
+      "publish": false
+    }
   }
 }
