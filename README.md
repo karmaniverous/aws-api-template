@@ -426,7 +426,7 @@ Once you have an operating CodePipeline, creating the next one is easy! Just fol
 
 ### Creating a Maintenance Pipeline
 
-The next deployment following any [API Version](#environments-api-versions-stages--stacks) upgrade will create a new [Stack](#environments-api-versions-stages--stacks) respecting the new API Version. The old stack will still be running: it will simply no longer receive new deployments.
+The next deployment following any [API Version](#environments-api-versions-stages--stacks) upgrade will create a new [Stack](#environments-api-versions-stages--stacks) reflecting the new API Version. The old stack will still be running: it will simply no longer receive new deployments.
 
 You may wish to continue maintenance development in the old major version to support existing users who have not yet migrated to the new version.
 
