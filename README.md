@@ -402,17 +402,17 @@ We're using the Serverless Framework to deploy from [`buildspec.yml`](./buildspe
 
 Review your settings & click _Create pipeline_. The new pipeline will immediately display a UI, pull your repo, and commence a build.
 
-### Creating Your Next CodePipeline
+### Creating Your Next Pipeline
 
 Once you have an operating CodePipeline, creating the next one is easy! Just follow these steps:
 
-1. You can deploy any stage from any code branch, but when you create a pipeline you have to choose which branch to watch and which stage to deploy from it. Make sure the branch you choose has corresponsing `.env.<stage>` & `.env.<stage>.local` files in your repository with environment variables correctly populated.
+1. You can deploy to any [Environment](#environments-api-versions-stages--stacks) from any branch, but when you create a pipeline you have to choose a specific source branch tand target Environment. Make sure the Environment you choose has corresponsing `.env.<stage>` & `.env.<stage>.local` files in your repository with environment variables correctly populated.
 
 1. Create the new branch (e.g. `dev` or `test`) and push it to your remote repository.
 
 1. Choose an existing pipeline from the same project on your [Pipelines Dashboard](https://us-east-1.console.aws.amazon.com/codesuite/codepipeline/pipelines), click into it, and click the _Clone pipeline_ button.
 
-1. Choose a pipeline name that follows your established naming pattern: `<service-name>-<stage>`
+1. Choose a pipeline name that follows your established naming pattern: `<SERVICE_NAME>-<ENV>`
 
 1. Choose an existing service role and pick the CodePipeline service role we created earlier (e.g. `codepipeline-service`).
 
@@ -422,9 +422,36 @@ Once you have an operating CodePipeline, creating the next one is easy! Just fol
 
 1. Edit the _Source_ pipeline stage, edit the _Source_ action, and change the _Branch name_ to your selected repo branch. Click _Done_ on the popup and the _Source_ pipeline stage.
 
-1. Edit the _Build_ pipeline stage, edit the _Build_ action, and change the environment variable values to match the `.env.<stage>.local` file corresponding to the new pipeline's target Stage. Click _Done_ on the popup and the _Build_ pipeline stage.
+1. Edit the _Build_ pipeline stage, edit the _Build_ action, and change the environment variable values to match the `.env.<ENV>.local` file corresponding to the new pipeline's target Environment. Click _Done_ on the popup and the _Build_ pipeline stage.
 
 1. Click the _Save_ button to save the pipeline changes and then click the _Release change_ button to run the pipeline in its new configuration. It will pull your code from the new branch and commence a build.
+
+### Creating a Maintenance Pipeline
+
+The next deployment following any [API Version](#environments-api-versions-stages--stacks) upgrade will create a new [Stack](#environments-api-versions-stages--stacks) respecting the new API Version. The old stack will still be running: it will simply no longer receive new deployments.
+
+You may wish to continue maintenance development in the old major version to support existing users who have not yet migrated to the new version.
+
+To accomplish this, follow these steps:
+
+1. [release-it](https://github.com/release-it/release-it) creates a GitHub tag at each release. Execute the following commands to pull a `dev` branch from that tag and then push it back to GitHub:
+
+   ```
+   git checkout <highest previous major version tag> -b v<previous major version>-dev
+   # Ex: git checkout 0.1.2 -b v0-dev
+
+   git push
+   ```
+
+   If the previous major version were `0.1.2`, this will have created new branch `v0-dev` at that tag.
+
+1. Follow the instructions in [Creating Your Next Pipeline](#creating-your-next-pipeline) to clone a new CodePipeline and attach it to this branch. Any new deployments on this pipeline will deploy into the previous API Version's existing `dev` Stack.
+
+1. Repeat the previous steps for your other Environments (e.g. `test` and `prod`).
+
+You can continue to release new versions within this major version. Just don't advance this branch to a new major version, or you will overwrite your existing next-version stacks!
+
+[TODO] Figure out how to prevent this from happening ([#11](#11)).
 
 ## Deleting a Stack
 
