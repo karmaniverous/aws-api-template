@@ -6,7 +6,11 @@ This template produces a secure [Amazon Web Services](https://aws.amazon.com/) (
 
 The API features both public and private endpoints, and is secured by a Cognito User Pool that supports native username/password authentication and one federated identity provider (Google). It is configured to act as both the authentication provider and a secure remote API for my [Next.js Template](https://github.com/karmaniverous/nextjs-template) on the front end.
 
+The template is highly configurable. You should be able to get it up and running on your own domain, in your own infrastructure, with edits to nothing but environment variables.
+
 This template can be deployed directly from the command line to multiple [AWS CloudFormation](https://aws.amazon.com/cloudformation/) stacks, each exposing an independent environment (e.g. `dev`, `test`, and `prod`), with its own authentication provider, at configurable endpoints. These endpoints will integrate with matching Next.js Template environments.
+
+Version control is built in. Every major release triggers the deployment of an independent stack on every environment in order to maintain backward compatibility for your users. There is a provision to share key resources across stacks so you can bring your users with you across major versions.
 
 If you integrate your code repository with [AWS CodePipeline](https://aws.amazon.com/codepipeline/), your code will automatically build and deploy following every push to the relevant branch. See [Automated Deployment](#automated-deployment) below for more info.
 
@@ -18,7 +22,11 @@ This template represents a specific solution to a bunch of specific problems. It
 
 ## Node.js & ES6
 
-[TODO]
+Choose your own poison. I like Javascript.
+
+The [AWS Lambda](https://aws.amazon.com/lambda/) execution environment now supports Node `v18`, which of course features full native ES6 support. If you are accustomed to building for the lowest common denominator with [Webpack](https://webpack.js.org/) & [Babel](https://babeljs.io/), rejoice: it just isn't necessary here!
+
+This probably makes for a much simpler project structure than you are accustomed to.
 
 ## The Serverless Framework
 
@@ -32,11 +40,33 @@ The [Serverless Framework](https://www.serverless.com/) is a well-supported, ope
 
 There are other choices as well, but we're using the Serverless Framework here because it seemed like a reasonably safe choice that offers plenty of room to grow.
 
+Worth noting that I tried & rejected these three key Serverless Framework plugins as either inadequate to the task or too unstable to trust:
+
+- [`serverless-certificate-creator`](https://www.serverless.com/plugins/serverless-certificate-creator)
+- [`serverless-dotenv-plugin`](https://www.serverless.com/plugins/serverless-dotenv-plugin)
+- [`serverless-plugin-ifelse`](https://www.serverless.com/plugins/serverless-plugin-ifelse)
+
+The necessary functions are in the template; I just found better ways of getting there.
+
+## Environments, API Versions, Stages & Stacks
+
+**This is important!** This document uses specific terms in specific ways, and it will help if we are all on the same page.
+
+Some key definitions:
+
+- An **Environment** is a logical step in your development process. This template currently supports three environments: `dev`, `test`, and `prod`. See [Some Thoughts About DevOps](#some-thoughts-about-devops) below for ideas about how to use these effectively.
+
+- An **API Version** is a distinct [major version](https://www.geeksforgeeks.org/introduction-semantic-versioning/) of your project. Major versions introduce breaking changes, so when you bump your major version, you want to keep your previous versions operating to support backward compatibility. This project defaults in API Version `v0`; subsequent values would be `v1`, `v2`, and so on.
+
+- **Stage** relates specifically to [AWS API Gateway](https://aws.amazon.com/api-gateway/). API Gateway supports multiple "environments" and "versions" (see above) on a single API Gateway instance. We will deploy each environment version to its _own_ API Gateway, so only one Stage each. This is normally a key term in Serverless deployments, but the template handles Stage construction for you, so I'll try to use this term as little as possible in this document to avoid confusion. Examples of Stages are `aws-api-template-v0-dev`, `aws-api-template-v1-prod`, and so on.
+
+- When you deploy a specific API Version into a specific Environment, this template creates a completely independent [CloudFormation stack](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html). A **Stack** contains all of the resources associated with that deployment, which may be updated in future deployments to the same Stack. Examples of Stacks are `aws-api-template-v0-dev`, `aws-api-template-v1-prod`, and so on. Stages and Stacks are PHYSICALLY very different, but LOGICALLY equivalent. To avoid confusion, in this document I will refer to Stacks rather than Stages wherever possible.
+
 ## Project Configuration
 
-As mentioned above, this template is intended to deploy to multiple environments in a highly configurable fashion. Both the project as a whole and individual environments include _secrets_: configurations that need to exist in your dev environment to support local testing and manual deployment, but should NOT be pushed to your code repository.
+This template is intended to deploy to multiple Environments across multiple API Versions in a highly configurable fashion. Both the project as a whole and individual environments include _secrets:_ configurations that need to exist in your dev environment to support local testing and manual deployment, but should NOT be pushed to your code repository.
 
-The key AWS configuration file in the project is `serverless.yml`. Nominally this file would contain most of this stuff, but I thought it would be a good idea to abstract configuration data away from this highly structured file.
+The key AWS configuration file in the project is [`serverless.yml`](./serverless.yml). Nominally this file would contain most of this stuff, but I thought it would be a good idea to abstract configuration data away from this highly structured file.
 
 Everybody understands `.env` environment variable files, so that seemed to be a great way to go, which is nominally supported by the [Serverless Dotenv Plugin](https://www.serverless.com/plugins/serverless-dotenv-plugin). Unfortunately, I couldn't get it to work.
 
@@ -48,7 +78,7 @@ Because of this, you will almost NEVER run `sls` directly! Instead, you will pre
 dotenv -c dev -- sls deploy
 ```
 
-More info on this in the relevant sections below.
+More info on this in the relevant sections below. Later I will encapsulate this approach and some other useful features into a CLI wrapper for `sls`. See [this issue](https://github.com/karmaniverous/aws-api-template/issues/10) for more info.
 
 ## Release Management
 
