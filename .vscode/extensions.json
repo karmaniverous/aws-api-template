@@ -2,6 +2,8 @@
   "recommendations": [
     "esbenp.prettier-vscode",
     "redhat.vscode-yaml",
-    "amazonwebservices.aws-toolkit-vscode"
+    "amazonwebservices.aws-toolkit-vscode",
+    "dbaeumer.vscode-eslint",
+    "hbenl.vscode-mocha-test-adapter"
   ]
 }
