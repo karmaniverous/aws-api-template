@@ -225,44 +225,44 @@ A local server should start with an endpoint at [`http://localhost:3000/v0-dev/h
 
 # Deploying to AWS
 
-Every AWS deployment is associated with a _Stage_.
+Every AWS deployment of this project either creates or updates a [Stack](#environments-api-versions-stages--stacks).
 
-Deploying a Stage creates or updates a [CloudFormation stack](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html) that...
+Which Stack gets created or updated depends on two factors:
 
-- Contains all of the resources associated with that Stage.
-- Exposes a unique set of API & authentication endpoints.
+- The [Environment](#environments-api-versions-stages--stacks) chosen at deployment time.
+- The [API Version](#environments-api-versions-stages--stacks) configured in [`.env`](./.env).
 
-The assumption is that these endpoints will map onto a custom domain, so there are som configurations to set and a little work to do in AWS before you can deploy a Stage to AWS.
+Each Stack contains all of the AWS resources associated with that deployment, and exposes a unique set of API & authentication endpoints.
+
+The assumption is that these endpoints will map onto a custom domain, so there are some configurations to set and a little work to do in AWS before you can deploy a Stack to AWS.
 
 ## Preparing AWS
 
-Follow these steps to prepare your AWS account to receive your deployment. Where you are asked to set an environmental variable, set it at [`.env`](./.env):
+Follow these steps to prepare your AWS account to receive your deployment. Where you are asked to set an environment variable in this section, set it at [`.env`](./.env):
 
-1. Choose a name for your service. This will be the root of every resource ID related to your application. It must begin with a letter; contain only ASCII letters, digits, and hyphens; and not end with a hyphen or contain two consecutive hyphens. Enter your service name for environmental variable `SERVICE_NAME`.
+1. Choose a name for your service (e.g. `my-aws-api`). This will be the root of every resource ID related to your application. It must begin with a letter; contain only ASCII letters, digits, and hyphens; and not end with a hyphen or contain two consecutive hyphens. Enter your service name for environment variable `SERVICE_NAME`.
 
-1. Choose a root domain (e.g. `mydomain.com`) and host its DNS at [AWS Route53](https://aws.amazon.com/route53/). Enter your root domain for environmental variable `ROOT_DOMAIN`.
+1. Choose a root domain (e.g. `mydomain.com`) and host its DNS at [AWS Route53](https://aws.amazon.com/route53/). Enter your root domain for environment variable `ROOT_DOMAIN`.
 
-1. Request & validate a certificate from the [ACM Console](https://us-east-1.console.aws.amazon.com/acm) that covers domains `mydomain.com` and `*.mydomain.com`. Enter the certificate ARN for environmental variable `CERTIFICATE_ARN`.
+1. Request & validate a certificate from the [ACM Console](https://us-east-1.console.aws.amazon.com/acm) that covers domains `<ROOT_DOMAIN>` and `*.<ROOT_DOMAIN>`. Enter the certificate ARN for environment variable `CERTIFICATE_ARN`.
 
-1. Choose an API subdomain. All of your APIs will be exposed at `<api-subdomain>.<root-domain>`. **Double-check your [Route 53](https://us-east-1.console.aws.amazon.com/route53) zone file to make sure it isn't already assigned to some other service!** Enter your API subdomain for environmental variable `API_SUBDOMAIN`.
+1. Choose an API subdomain (e.g. `api`). All of your APIs will be exposed at `<API_SUBDOMAIN>.<ROOT_DOMAIN>`. **Double-check your [Route 53](https://us-east-1.console.aws.amazon.com/route53) zone file to make sure it isn't already assigned to some other service!** Enter your API subdomain for environment variable `API_SUBDOMAIN`.
 
-1. Choose an authorization subdomain. Your authorization endpoints will be at `<auth-subdomain>.<root-domain>` and `<auth-subdomain>-<stage>.<root-domain>`. **Double-check your [Route 53](https://us-east-1.console.aws.amazon.com/route53) zone file to make sure these aren't already assigned to some other service!** Enter your authorization subdomain for environmental variable `AUTH_SUBDOMAIN`.
+1. Choose your [API Version](#environments-api-versions-stages--stacks) (e.g. `v0`). Enter the appropriate value for environment variable `API_VERSION`.
 
-1. The template assumes your Cognito Authorization UI will be integrated with a web application at a subdomain of the same root domain (e.g. my [Next.js Template](https://github.com/karmaniverous/nextjs-template)).
+   In the future, this value will be pulled directly from the package version at deploy time. See [this issue](https://github.com/karmaniverous/aws-api-template/issues/10) for more info.
 
-   Enter the web application subdomain for environmental variable `WEB_SUBDOMAIN`.
+1. Choose an authorization subdomain token (e.g. `auth`). Your authorization endpoints will be at `<AUTH_SUBDOMAIN_TOKEN>-<API_VERSION>[-<non-prod environment>].<ROOT_DOMAIN>`. **Double-check your [Route 53](https://us-east-1.console.aws.amazon.com/route53) zone file to make sure these aren't already assigned to some other service!** Enter your authorization subdomain token for environment variable `AUTH_SUBDOMAIN_TOKEN`.
 
-   [TODO] Support web apps at root domain, i.e. `WEB_SUBDOMAIN` blank.
+1. The template assumes your Cognito Authorization UI will be integrated with a web application at `ROOT_DOMAIN` or at subdomains representing either a `prod` or a `preview` front-end environment (e.g. my [Next.js Template](https://github.com/karmaniverous/nextjs-template)).
 
-   For local testing, enter the web application's `localhost` port for environmental variable `WEB_LOCALHOST_PORT`.
+   Enter appropriate subdomains for environment variables `WEB_SUBDOMAIN_PROD` and `WEB_SUBDOMAIN_PREVIEW`.
+
+   For local testing, enter the web application's `localhost` port for environment variable `WEB_LOCALHOST_PORT`.
 
    If you're using a different front-end application, you'll have to edit [`serverless.yml`](./serverless.yml) accordingly. You can leave this alone for now and the application will still deploy properly!
 
-1. Your API Version factors into your various endpoints. This template uses [semantic versioning](https://semver.org/), but for now this is loosely integrated. Your API version should be `v<major-version>`, so by default when you first pull this template it is `v0`. If you are at a later major version, enter the appropriate value for environmental variable `API_VERSION`.
-
-   [TODO] Pull `API_VERSION` directly from package version.
-
-1. Run the following command to create an API Gateway custom domain at `<api-subdomain>.<root-domain>`.
+1. Run the following command to create an API Gateway custom domain at `<API_SUBDOMAIN>.<ROOT_DOMAIN>`.
 
    ```bash
    dotenv -- sls create_domain
@@ -272,13 +272,13 @@ That's it. You're now all set to deploy to any Stage at AWS!
 
 ## Manual Deployment
 
-Run the following command to deploy to `<stage>` (e.g. `dev`, `test`, or `prod`):
+Run the following command to deploy a [Stage](#environments-api-versions-stages--stacks) to [Environment](#environments-api-versions-stages--stacks) `<env>` (e.g. `dev`, `test`, or `prod`) for the configured [API Version](<(#environments-api-versions-stages--stacks)>):
 
 ```bash
-dotenv -c <stage> -- sls deploy --verbose
+dotenv -c <env> -- sls deploy --verbose
 ```
 
-If this is your first time, try deploying to the `dev` stage.
+If this is your first time, try deploying to the `dev` Environment.
 
 Deployment takes a few minutes. Deployments are differential, so the first one to any stage will take the longest.
 

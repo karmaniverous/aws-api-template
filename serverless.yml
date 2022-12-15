@@ -131,12 +131,14 @@ resources:
           - openid
           - profile
         CallbackURLs:
+          - 'https://${env:ROOT_DOMAIN}/api/auth/callback/cognito'
           - 'https://${env:WEB_SUBDOMAIN_PROD}.${env:ROOT_DOMAIN}/api/auth/callback/cognito'
           - 'https://${env:WEB_SUBDOMAIN_PREVIEW}.${env:ROOT_DOMAIN}/api/auth/callback/cognito'
           - 'http://localhost:${env:WEB_LOCALHOST_PORT}/api/auth/callback/cognito'
         ClientName: web-app
         GenerateSecret: true
         LogoutURLs:
+          - 'https://${env:ROOT_DOMAIN}'
           - 'https://${env:WEB_SUBDOMAIN_PROD}.${env:ROOT_DOMAIN}'
           - 'https://${env:WEB_SUBDOMAIN_PREVIEW}.${env:ROOT_DOMAIN}'
           - 'http://localhost:${env:WEB_LOCALHOST_PORT}'
