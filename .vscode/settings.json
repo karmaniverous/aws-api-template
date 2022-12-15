@@ -6,5 +6,8 @@
   "javascript.preferences.importModuleSpecifierEnding": "minimal",
   "javascript.updateImportsOnFileMove.enabled": "always",
   "prettier.singleQuote": true,
-  "yaml.format.singleQuote": true
+  "yaml.format.singleQuote": true,
+  "[markdown]": {
+    "editor.wordWrap": "bounded"
+  }
 }
