@@ -8,10 +8,10 @@ plugins:
 params:
   default:
     apiBasePath: ${env:API_VERSION}-${env:STAGE}
-    authSubdomain: ${env:AUTH_SUBDOMAIN}-${env:API_VERSION}-${env:STAGE}
+    authSubdomain: ${env:AUTH_SUBDOMAIN_TOKEN}-${env:API_VERSION}-${env:STAGE}
   prod:
     apiBasePath: ${env:API_VERSION}
-    authSubdomain: ${env:AUTH_SUBDOMAIN}-${env:API_VERSION}
+    authSubdomain: ${env:AUTH_SUBDOMAIN_TOKEN}-${env:API_VERSION}
 
 provider:
   apiGateway:
