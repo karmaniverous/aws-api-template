@@ -82,7 +82,13 @@ More info on this in the relevant sections below. Later I will encapsulate this 
 
 ## Release Management
 
-[TODO]
+This template supports automated release management with [`release-it`](https://github.com/release-it/release-it).
+
+Releases are numbered according to [Semantic Versioning](https://www.geeksforgeeks.org/introduction-semantic-versioning/), and every release generates a release page at GitHub with release notes composed of your commit comments since the last release.
+
+In the near future (see [this issue](./issues/10)), the template will pick up on your major version number to populate API Version, which is a factor driving Stack creation. See [Environments, API Versions, Stages & Stacks](#environments-api-versions-stages--stacks) above for more info.
+
+Meanwhile, you'll need to populate the `API_VERSION` environment variable manually in [`.env`](./.env).
 
 # Setting Up Your Dev Environment
 
@@ -168,6 +174,17 @@ Look for these files in your project directory:
 Copy each of these files and remove the `template` extension from the copy.
 
 **Do not simply rename these files!** Anybody who pulls your repo will need these templates to create the same files in his own local environment.
+
+## Connect to GitHub
+
+This template supports automated release management with [`release-it`](https://github.com/release-it/release-it).
+
+If you use GitHub, create a [Personal Access Token](https://github.com/settings/tokens/new?scopes=repo&description=release-it)
+and add it as the value of `GITHUB_TOKEN` in `.env.local`.
+
+If you use GitLab, follow [these instructions](https://github.com/release-it/release-it#gitlab-releases) and place your token in the same file.
+
+For other release control systems, consult the [`release-it` README](https://github.com/release-it/release-it#readme).
 
 ## Connect to AWS
 
