@@ -280,9 +280,9 @@ dotenv -c <env> -- sls deploy --verbose
 
 If this is your first time, try deploying to the `dev` Environment.
 
-Deployment takes a few minutes. Deployments are differential, so the first one to any stage will take the longest.
+Deployments take a few minutes and are differential, so the first one to any Stack will take the longest.
 
-Once your deployment succeeds, you will see a list of available resources. For example:
+Once your deployment succeeds, your console will display a list of available resources. For example:
 
 ```text
 endpoints:
@@ -300,7 +300,7 @@ Serverless Domain Manager:
 The public base path of your API will depend on your settings, but will look like:
 
 ```
-https://<api-subdomain>.<root-domain>/v<major-version>[-<non-prod-stage>]
+https://<API_SUBDOMAIN>.<ROOT_DOMAIN>/<API_VERSION>[-<non-prod environment>].<ROOT_DOMAIN>
 ```
 
 To test your deployment, open your hello-world public endpoint in a browser, e.g. [`https://aws-api-template.karmanivero.us/v0-dev/hello`](https://aws-api-template.karmanivero.us/v0-dev/hello). You should see the following content:
