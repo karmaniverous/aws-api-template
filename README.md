@@ -144,21 +144,23 @@ Rather than install Node.js directly, it is better to install it & manage versio
 
 ## Create a new GitHub Repository
 
-[Click here](https://github.com/karmaniverous/aws-api-template/generate) to clone this template into your own GitHub account. Give it a name like `my-aws-api`.
+[Click here](https://github.com/karmaniverous/aws-api-template/generate) to clone this template into your own GitHub account.
 
-**Are you cloning an existing repository?** No need to do this then.
+**Do you already have a repository based on this template?** No need to do this then.
 
 ## Clone the Project Repository
 
-Navigate your VS Code terminal to the directory you use for code repositories and run this command to clone this repo, using your new project name. You may be asked to log into GitHub.
+Navigate your VS Code terminal to the directory you use for code repositories and run this command with appropriate replacements to clone this repo. You may be asked to log into GitHub.
 
 ```bash
-git clone https://github.com/karmaniverous/my-aws-api.git
+git clone https://github.com/<my-github-account-or-organization-name>/<my-project-name>.git
 ```
 
 Open the newly created local repository folder in VS Code.
 
-If this is your first time opening the folder, you will be asked to install recommended VS Code extensions. Install them. If not, follow these steps to install all workspace-recommended extensions:
+If this is your first time opening the folder, you should be asked to install recommended VS Code extensions. Install them.
+
+If VS Code didn't ask, follow these steps to install all workspace-recommended extensions:
 
 1. Open the VS Code Extensions tab
 2. Enter `@recommended` into the search box
@@ -172,7 +174,7 @@ Run the following command to install project dependencies:
 npm install
 ```
 
-## Create Local Environmental Variable Files
+## Create Local Environment Variable Files
 
 Look for these files in your project directory:
 
@@ -184,6 +186,8 @@ Look for these files in your project directory:
 Copy each of these files and remove the `template` extension from the copy.
 
 **Do not simply rename these files!** Anybody who pulls your repo will need these templates to create the same files in his own local environment.
+
+In the future, this will be accomplished with a single CLI command. See [this issue](https://github.com/karmaniverous/aws-api-template/issues/10) for more info.
 
 ## Connect to GitHub
 
