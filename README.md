@@ -84,7 +84,7 @@ More info on this in the relevant sections below. Later I will encapsulate this 
 
 This template supports automated release management with [`release-it`](https://github.com/release-it/release-it).
 
-Releases are numbered according to [Semantic Versioning](https://www.geeksforgeeks.org/introduction-semantic-versioning/), and every release generates a release page at GitHub with release notes composed of your commit comments since the last release.
+Releases are numbered according to [Semantic Versioning](https://www.geeksforgeeks.org/introduction-semantic-versioning/). Every release generates a release page at GitHub with release notes composed of your commit comments since the last release.
 
 In the near future (see [this issue](https://github.com/karmaniverous/aws-api-template/issues/10)), the template will pick up on your major version number to populate API Version, which is a factor driving Stack creation. See [Environments, API Versions, Stages & Stacks](#environments-api-versions-stages--stacks) above for more info.
 
@@ -100,7 +100,7 @@ npm run release
 
 Use the [Visual Studio Code](https://code.visualstudio.com/) IDE in order to leverage relevant extensions. Not an absolute requirement but you'll be happy if you do.
 
-These instructions are written from the perspective of the Windows OS. If you are a Mac user, you may need to make some adjustments.
+These instructions are written from the perspective of Windows OS. If you are a Mac or Linux user, you may need to make some adjustments.
 
 They also assume you have local administrator permissions on your development machine.
 
@@ -130,11 +130,15 @@ Rather than install Node.js directly, it is better to install it & manage versio
 
 1. Install Visual Studio Code from [this page](https://code.visualstudio.com/).
 
-1. **WINDOWS ONLY:** Open VS Code. In a terminal window, enter `code $profile`. A file named `Microsoft.PowerShell_profile.ps1` will open in your code editor. Add the following line to this file, then save and close it:
+1. **WINDOWS ONLY:** There is an alias conflict between the `serverless` package and the PowerShell `Select-String` command.
+
+   To resolve it, open VS Code. In a terminal window, enter `code $profile`. A file named `Microsoft.PowerShell_profile.ps1` will open in your code editor. Add the following line to this file, then save and close it:
 
    ```bash
    Remove-Item alias:sls
    ```
+
+   If you choose not to resolve this, than at any point in these instructions where I use `sls`, you should use `serverless` instead.
 
 1. **Restart your machine.**
 
