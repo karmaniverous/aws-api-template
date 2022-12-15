@@ -322,7 +322,9 @@ An [AWS CodePipeline](https://aws.amazon.com/codepipeline/) watches a code repos
    1. Deploys the [Stage](#environments-api-versions-stages--stacks) defined by `API_VERSION` and the configured [Environment](#environments-api-versions-stages--stacks), _exactly as you would do from your desktop!_
    1. Preserves the logs and deallocates the virtual machine.
 
-There is one CodePipeline for eached watched branch, each corresponding a deployment Stage. All of them call the same CodeBuild project. Each CodePipeline is manually configured with a small set of environmental variables, which it injects into the CodeBuild project. These are the environment secrets contained in each `.env.<stage>.local` file, which are blocked by `.gitignore` and are never pushed to the code repository.
+Each CodePipeline is configured to deploy to the Environment corresponding to the branch it watches. For example, the CodePipeline watching the `main` branch may be configured to deploy to the `prod` Environment. On deployment, the CodePipeline will deploy to the Stack corresponding to its designated Environment and its current API Version. If that Stack does not yet exist, the deployment process will create it.
+
+All related CodePipelines share the same CodeBuild project. Each CodePipeline is configured with environment variables that it injects into the CodeBuild project on deployment. These are the environment designator and environment secrets contained in each `.env.<ENV>.local` file, which are blocked by [`.gitignore`](./.gitignore) and are never pushed to the code repository.
 
 The CodeBuild process is driven by [`buildspec.yml`](./buildspec.yml).
 
