@@ -51,7 +51,6 @@ functions:
           path: hello
           method: get
           cors: true
-    # name: ${self:provider.stage}
 
   secure-hello:
     handler: api/secure/hello.get
