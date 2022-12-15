@@ -78,7 +78,7 @@ Because of this, you will almost NEVER run `sls` directly! Instead, you will pre
 dotenv -c dev -- sls deploy
 ```
 
-More info on this in the relevant sections below. Later I will encapsulate this approach and some other useful features into a CLI wrapper for `sls`. See [this issue](https://github.com/karmaniverous/aws-api-template/issues/10) for more info.
+More info on this in the relevant sections below. Later I will encapsulate this approach and some other useful features into a CLI wrapper for `sls`. ([#10](https://github.com/karmaniverous/aws-api-template/issues/10))
 
 ## Release Management
 
@@ -86,7 +86,7 @@ This template supports automated release management with [`release-it`](https://
 
 Releases are numbered according to [Semantic Versioning](https://www.geeksforgeeks.org/introduction-semantic-versioning/). Every release generates a release page at GitHub with release notes composed of your commit comments since the last release.
 
-In the near future (see [this issue](https://github.com/karmaniverous/aws-api-template/issues/10)), the template will pick up on your major version number to populate API Version, which is a factor driving Stack creation. See [Environments, API Versions, Stages & Stacks](#environments-api-versions-stages--stacks) above for more info.
+In the near future ([#10](https://github.com/karmaniverous/aws-api-template/issues/10)), the template will pick up on your major version number to populate API Version, which is a factor driving Stack creation. See [Environments, API Versions, Stages & Stacks](#environments-api-versions-stages--stacks) above for more info.
 
 Meanwhile, you'll need to populate the `API_VERSION` environment variable manually in [`.env`](./.env).
 
@@ -187,7 +187,7 @@ Copy each of these files and remove the `template` extension from the copy.
 
 **Do not simply rename these files!** Anybody who pulls your repo will need these templates to create the same files in his own local environment.
 
-In the future, this will be accomplished with a single CLI command. See [this issue](https://github.com/karmaniverous/aws-api-template/issues/10) for more info.
+In the future, this will be accomplished with a single CLI command. ([#10](https://github.com/karmaniverous/aws-api-template/issues/10))
 
 ## Connect to GitHub
 
@@ -250,7 +250,7 @@ Follow these steps to prepare your AWS account to receive your deployment. Where
 
 1. Choose your [API Version](#environments-api-versions-stages--stacks) (e.g. `v0`). Enter the appropriate value for environment variable `API_VERSION`.
 
-   In the future, this value will be pulled directly from the package version at deploy time. See [this issue](https://github.com/karmaniverous/aws-api-template/issues/10) for more info.
+   In the future, this value will be pulled directly from the package version at deploy time. ([#10](https://github.com/karmaniverous/aws-api-template/issues/10))
 
 1. Choose an authorization subdomain token (e.g. `auth`). Your authorization endpoints will be at `<AUTH_SUBDOMAIN_TOKEN>-<API_VERSION>[-<non-prod environment>].<ROOT_DOMAIN>`. **Double-check your [Route 53](https://us-east-1.console.aws.amazon.com/route53) zone file to make sure these aren't already assigned to some other service!** Enter your authorization subdomain token for environment variable `AUTH_SUBDOMAIN_TOKEN`.
 
@@ -348,7 +348,7 @@ If you are building this from scratch, you are probably operating from your `mai
 
 **Before you begin...** Your pipeline will pull your repo and start a build as soon as it is created! Commit all of your local changes and push your commits to GitHub.
 
-From your [Pipelines Dashboard](https://us-east-1.console.aws.amazon.com/codesuite/codepipeline/pipelines), create a new pipeline.
+From your [Pipelines Console](https://us-east-1.console.aws.amazon.com/codesuite/codepipeline/pipelines), create a new pipeline.
 
 **Step 1: Choose Pipeline Settings**
 
@@ -410,7 +410,7 @@ Once you have an operating CodePipeline, creating the next one is easy! Just fol
 
 1. Create the new branch (e.g. `dev` or `test`) and push it to your remote repository.
 
-1. Choose an existing pipeline from the same project on your [Pipelines Dashboard](https://us-east-1.console.aws.amazon.com/codesuite/codepipeline/pipelines), click into it, and click the _Clone pipeline_ button.
+1. Choose an existing pipeline from the same project on your [Pipelines Console](https://us-east-1.console.aws.amazon.com/codesuite/codepipeline/pipelines), click into it, and click the _Clone pipeline_ button.
 
 1. Choose a pipeline name that follows your established naming pattern: `<SERVICE_NAME>-<ENV>`
 
@@ -493,92 +493,130 @@ It's your project. Do what you want! But if you're interested, here's a rational
 
   If you've [set up your CodePipelines](#automated-deployment), the same thing will happen when you merge your feature branch with the `dev` branch.
 
-- This remote build will often fail catastrophically and require you to [delete the `dev` stack](#deleting-a-stack) & start over. Once it doesn't—and assuming all your other tests pass—you can deploy the stable build to your `test` stage for integration testing by merging your `dev` branch into `test`.
+- This remote build will often fail catastrophically and require you to [delete the `dev` stack](#deleting-a-stack) & start over. Once it doesn't—and assuming all your other tests pass—you can [create a prerelease](#release-management) and deploy the stable build to your `test` stage for integration testing by merging your `dev` branch into `test`.
 
-- Once your integration tests pass, you can deploy the new feature into production by merging your `test` branch into `main`.
+- Once your integration tests pass, you can [create a release](#release-management) and deploy the new feature into production by merging your `test` branch into `main`.
 
-Meanwhile template uses [semantic versioning](https://semver.org/). A new major version represents a breaking change, so with the release of a new major version, most organizations continue to maintain live endpoints for previous major versions.
-
-This means that as soon as a major version changes, all future deployments to a given stage should land on a new, version-specific stack. This is in fact the way this template operates: there is a unique CloudFormation stack for every unique combination of deployed `stage` and `api-version`.
-
-By default, this template expresses major version `v0`. Let's say you release a `v1` major version and push it to your `main` branch. This will create a new set of production endpoints that express the new version.
-
-It will _also_ create an independent Cognito User Pool on a unique set of endpoints. You may not want this! If there have been no breaking changes to your User Pool, you probably want to retain the user accounts created in the `v0` stack.
-
-To accomplish this, simply add the relevant Cognito User Pool ARN to environment variable `COGNITO_USER_POOL_ARN` in file `.env.<stage>`.
-
-This project's code repository features two protected branches: `main` and `test`. Commits to these branches trigger build processes that update public endpoints. They are configured as follows:
-
-| Branch | Description         | Rules                                                 |                                                   Pipeline                                                    | Public Endpoint                    |
-| ------ | ------------------- | ----------------------------------------------------- | :-----------------------------------------------------------------------------------------------------------: | ---------------------------------- |
-| `dev`  | development trunk   | Direct commits & pull requests allowed.               |                                                     none                                                      | https://api.karmanivero.us/v0-dev  |
-| `test` | integration testing | No direct commits.<br>Pull requests only from `dev`.  | [#](https://us-east-1.console.aws.amazon.com/codesuite/codepipeline/pipelines/aws-api-codepipeline-test/view) | https://api.karmanivero.us/v0-test |
-| `main` | production          | No direct commits.<br>Pull requests only from `test`. | [#](https://us-east-1.console.aws.amazon.com/codesuite/codepipeline/pipelines/aws-api-codepipeline-prod/view) | https://api.karmanivero.us/v0      |
-
-To develop a feature, follow these steps:
-
-1. Either work in `dev` or spawn a `dev-xyx` branch from `dev`. Test your work for deployment by running the following command to deploy to the `dev` stack at AWS:
-
-   ```bash
-   sls deploy --aws-profile <profile name>
-   ```
-
-1. Once `dev` deployment succeeds, merge your work into the `dev` trunk if necessary and validate deployment again from there. Then generate a pull request to merge your work with `test`.
-
-   - If the resulting build process succeeds, the new feature will be visible at the integration testing endpoint.
-   - If the build fails, report the bug & restart. The priorities should be to surface the build failure into the test build, then to resolve it.
-
-1. Perform integration testing. If it fails, report the bug & restart.
-
-1. Once integration testing succeeds, generate a pull request to merge your work with `main`. The new feature will be visible at the production endpoint.
+- If your new release is a major release, [create a maintenance pipeline](#creating-a-maintenance-pipeline) to support maintenance & backward compatibility for the previous major release.
 
 # Authentication
 
 User authentication is provided by AWS Cognito.
 
-The setup supports sign up & sign in via the Cognito hosted UI.
+By default, the setup supports sign up & sign in via the Cognito hosted UI. When a user signs up with an email/password combination, AWS will send an email with a code to confirm the email.
 
-Users can sign up with an email/password combination. AWS will send an email with a code to confirm the email.
+The template supports the Google federated identity provider but it is disabled by default. See [Add Google Authentication](#add-google-authentication) below for more info.
 
-Users can also sign up with the Google federated identity provider. AWS will not confirm related emails.
+## Backwards Compatibility
 
-## Add a new federated identity provider.
+An [API Version](#environments-api-versions-stages--stacks) upgrade generates a new [Stack](#environments-api-versions-stages--stacks) that includes an independent Cognito User Pool on a unique set of endpoints. You may not want this! If there have been no breaking changes to your User Pool, you probably want to retain the user accounts created in the previous API Version.
 
-TODO
+To accomplish this, simply add the relevant Cognito User Pool ARN to environment variable `COGNITO_USER_POOL_ARN` in file `.env.<ENV>`.
 
-## Notes
+## Add Google Authentication
 
-As of now, users can create multiple accounts with the same email, but different user names. Need to fix this.
+AWS Cognito supports a wide variety of federated identity providers. Google is the only one currently supported by this template.
 
-Federated identities (i.e. social logins) with the same email also generate new accounts. Might be harder to fix.
+To enable Google authentication, follow these steps:
+
+1. Follow the Google-related instructions at [this page](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-social-idp.html) to set up a Google OAUTH2 application. Use the following Stage-spacific settings:
+
+   - _Authorized Javascript Origins:_ `<AUTH_SUBDOMAIN_TOKEN>-<API_VERSION>[-<non-prod ENV>].<ROOT_DOMAIN>`
+   - _Authorized Redirect URIs:_ `<AUTH_SUBDOMAIN_TOKEN>-<API_VERSION>[-<non-prod ENV>].<ROOT_DOMAIN>/oauth2/idpresponse`
+
+1. Add the resulting Client ID to environment variable `GOOGLE_CLIENT_ID` in file `.env.<ENV>`
+
+1. Add the resulting Client Secret to environment variable `GOOGLE_CLIENT_SECRET` in file `.env.<ENV>.local`
+
+1. Add the same Client Secret to environment variable `GOOGLE_CLIENT_SECRET` in the relevant CodePipeline configuration.
+
+## Add Support For Other Federated Identity Providers
+
+If you configure new federated identity providers following the patterns in this template, then they will only be ENABLED when the relevant client ID, client secret, etc. are added to the project configuration.
 
 [This page](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-social-idp.html) contains instructions for setting up Cognito-compatible OAUTH2 apps at Facebook, Amazon, Google, and Apple.
 
-It is also possible to set up custom OpenId Connect (OIDC) providers which presumably will account for Twitter etc. Haven't completely figured that one out yet but there is an AWS reference [here](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-oidc-idp.html).
+It is also possible to set up custom OpenId Connect (OIDC) providers which presumably will account for Twitter etc. There is an AWS reference [here](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-oidc-idp.html).
 
-Once an OIDC provider is set up, it can be integrated via the `SupportedIdentityProviders` property described [here](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cognito-userpoolclient.html). See [here](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cognito-userpoolidentityprovider.html) for more info on defining identity providers.
+Once you understand the requirements of your new identity provider, follow these steps:
 
-I am building in an [AWS Cognito User Pool](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools.html).
+1. Add the relevant new non-secret environment variables (e.g. `GOOGLE_CLIENT_ID) to all `.env.<ENV>`files. If no value is available, set the value to`\*`
 
-[This](https://medium.com/@Da_vidgf/using-cognito-for-users-management-in-your-serverless-application-1695fec9e225) looks like a solid reference, but it's a few years old (2019-02-16).
+1. Add the relevant new secret environment variables (e.g. `GOOGLE_CLIENT_SECRET`) to all `.env.<ENV>.local` files. If no value is available, set the value to `*`.
 
-Here is a [Serverless Framework plugin](https://www.serverless.com/plugins/aws-cognito-idp-userpool-domain) that seems to do the same thing. Last update was 4 years ago.
+1. Add the same secret environment variables (e.g. `GOOGLE_CLIENT_SECRET`) to all `.env.<ENV>.local.template` files. Set all values to `*`.
 
-[This](https://www.freecodecamp.org/news/aws-cognito-authentication-with-serverless-and-nodejs/) is a guide from Jan 2022.
+1. Add the same secret environment variables (e.g. `GOOGLE_CLIENT_SECRET`) to all CodePipelines. If no value is available, set the value to `*`.
 
-So far we have the Cognito hosted UI functioning with user/password & Google login. A major issue right now is that a Google account with the same email as a user/password acct creates a duplicate account. Not sure what to do about that.
+1. Add a new identity provider Condition in [`serverless.yml`](./serverless.yml). Its purpose is to test whether the necessary environment variables have been populated to support enabling the identity provider.
 
-The hosted UI creates calls the callback URL on login. This is the first half of the OAUTH2 flow, with a code in the query string. Some questions here:
+   The new condition should be similar to `CreateIdentityProviderGoogle` below and reference the new provider's environment variables:
 
-- How do I convert that code into an authorization token? There seems to be a sort of an answer [here](https://stackoverflow.com/questions/45785898/how-to-use-the-code-returned-from-cognito-to-get-aws-credentials).
+   ```yml
+   resources:
+   Conditions:
+     CreateUserPool: !Equals ['${env:COGNITO_USER_POOL_ARN}', '*']
+     CreateIdentityProviderGoogle: !And
+       - !Condition CreateUserPool
+       - !Not
+       - !Or
+         - !Equals ['${env:GOOGLE_CLIENT_ID}', '*']
+         - !Equals ['${env:GOOGLE_CLIENT_SECRET}', '*']
+   ```
 
-- Once I have the token, is there a way to persist that in the browser so I don't have to go get it every time? The answer appears to be: _not automatically_. A web app will do this with a cookie
+1. Create a new User Pool Identity Provider in [`serverless.yml`](./serverless.yml). It should be similar to the one below but meet the requirements of the new provider:
+
+   ```yml
+   UserPoolIdentityProviderGoogle:
+     Type: AWS::Cognito::UserPoolIdentityProvider
+     Condition: CreateIdentityProviderGoogle
+     Properties:
+       UserPoolId: !Ref UserPool
+       ProviderName: Google
+       ProviderDetails:
+         client_id: '${env:GOOGLE_CLIENT_ID}'
+         client_secret: '${env:GOOGLE_CLIENT_SECRET}'
+         authorize_scopes: 'profile email openid'
+       ProviderType: Google
+       AttributeMapping:
+         email: email
+   ```
+
+1. Conditionally reference the new User Pool Identity Provider in [`serverless.yml`](./serverless.yml) under `UserClient.Properties.SupportedIdentityProviders`. Reference the new Condition and the new User Pool Identity Provider, similar to how it is done with Google below:
+
+   ```yml
+   SupportedIdentityProviders:
+     - COGNITO
+     - !If
+       - CreateIdentityProviderGoogle
+       - Google
+       - Ref: AWS::NoValue
+   ```
+
+Test your setup by attempting a remote deployment. If your deployment succeeds, you will your provider configured under _Federated identity provider sign-in_ on the relevant User Pool's _Sign-in experience_ tab at your [AWS Cognito Console](https://us-east-1.console.aws.amazon.com/cognito).
 
 # API Endpoints
 
 TODO
 
 # Issues
+
+## Secure Certificate
+
+Normally we would specify a certificate on `karmanivero.us` and `*.karmanivero.us` using the [`serverless-certificate-creator`](https://www.serverless.com/plugins/serverless-certificate-creator) plugin. The required entry in `serverless.yaml` would look like
+
+```yaml
+custom:
+  customCertificate:
+    certificateName: 'karmanivero.us'
+    hostedZoneNames: 'karmanivero.us.'
+    subjectAlternativeNames:
+      - '*.karmanivero.us'
+```
+
+The alternative name is currently creating an issue with this. It looks like the plugin is trying to submit duplicate validation records to the zone file, resulting in an error. See [this pull request](https://github.com/schwamster/serverless-certificate-creator/pull/55) for more info.
+
+Meanwhile, let's create & verify the certificate manually using the [ACM Console](https://us-east-1.console.aws.amazon.com/acm/home#/certificates/list) and then reference the certificate by ARN in `serverless.yaml`.
 
 ## `serverless.yml` Validation
 
@@ -617,19 +655,8 @@ Learn more about configuration validation here: http://slss.io/configuration-val
 
 You can ignore this warning.
 
-## Secure Certificate
+## User Accounts
 
-Normally we would specify a certificate on `karmanivero.us` and `*.karmanivero.us` using the [`serverless-certificate-creator`](https://www.serverless.com/plugins/serverless-certificate-creator) plugin. The required entry in `serverless.yaml` would look like
+As of now, users can create multiple accounts with the same email, but different user names. ([#12](https://github.com/karmaniverous/aws-api-template/issues/12))
 
-```yaml
-custom:
-  customCertificate:
-    certificateName: 'karmanivero.us'
-    hostedZoneNames: 'karmanivero.us.'
-    subjectAlternativeNames:
-      - '*.karmanivero.us'
-```
-
-The alternative name is currently creating an issue with this. It looks like the plugin is trying to submit duplicate validation records to the zone file, resulting in an error. The issue is documented in [this pull request](https://github.com/schwamster/serverless-certificate-creator/pull/55).
-
-Meanwhile, let's create & verify the certificate manually using the [ACM Console](https://us-east-1.console.aws.amazon.com/acm/home#/certificates/list) and then reference the certificate by ARN in `serverless.yaml`.
+Federated identities (i.e. social logins) with the same email also generate new accounts. ([#13](https://github.com/karmaniverous/aws-api-template/issues/13))
