@@ -597,16 +597,44 @@ Test your setup by attempting a remote deployment. If your deployment succeeds, 
 
 # API Endpoints
 
-The base API path for any stack is:
+| Endpoint      | Pattern                                                            | `dev` example                                          | `prod` example                                     |
+| ------------- | ------------------------------------------------------------------ | ------------------------------------------------------ | -------------------------------------------------- |
+| Base API Path | `https:<API_SUBDOMAIN>.<ROOT_DOMAIN>/API_VERSION[-{non-prod ENV}]` | `https://aws-api-template.karmanivero.us/v0-dev/hello` | `https://aws-api-template.karmanivero.us/v0/hello` |
+
+## Base API Path
 
 ```bash
 https:<API_SUBDOMAIN>.<ROOT_DOMAIN>/API_VERSION[-{non-prod ENV}]
 
 # Example: ENV=dev, API_VERSION=v0, endpoint=/hello
-[https://aws-api-template.karmanivero.us/v0-dev/hello](https://aws-api-template.karmanivero.us/v0-dev/hello)
+https://aws-api-template.karmanivero.us/v0-dev/hello
 
 # Example: ENV=prod, API_VERSION=v0, endpoint=/hello
 https://aws-api-template.karmanivero.us/v0/hello
+```
+
+## Authorized Javascript Origin
+
+```bash
+<AUTH_SUBDOMAIN_TOKEN>-<API_VERSION>[-<non-prod ENV>].<ROOT_DOMAIN>
+
+# Example: ENV=dev, API_VERSION=v0
+https://aws-api-template-auth-v0-dev.karmanivero.us
+
+# Example: ENV=prod, API_VERSION=v0
+https://aws-api-template-auth-v0.karmanivero.us
+```
+
+## Authorized Redirect
+
+```bash
+<AUTH_SUBDOMAIN_TOKEN>-<API_VERSION>[-<non-prod ENV>].<ROOT_DOMAIN>
+
+# Example: ENV=dev, API_VERSION=v0
+https://aws-api-template-auth-v0-dev.karmanivero.us/oauth2/idpresponse
+
+# Example: ENV=prod, API_VERSION=v0
+https://aws-api-template-auth-v0.karmanivero.us/oauth2/idpresponse
 ```
 
 # Issues
