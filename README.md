@@ -406,7 +406,7 @@ Review your settings & click _Create pipeline_. The new pipeline will immediatel
 
 Once you have an operating CodePipeline, creating the next one is easy! Just follow these steps:
 
-1. You can deploy to any [Environment](#environments-api-versions-stages--stacks) from any branch, but when you create a pipeline you have to choose a specific source branch tand target Environment. Make sure the Environment you choose has corresponsing `.env.<stage>` & `.env.<stage>.local` files in your repository with environment variables correctly populated.
+1. You can deploy to any [Environment](#environments-api-versions-stages--stacks) from any branch, but when you create a pipeline you have to choose a specific source branch tand target Environment. Make sure the Environment you choose has corresponsing `.env.<ENV>` & `.env.<ENV>.local` files in your repository with environment variables correctly populated.
 
 1. Create the new branch (e.g. `dev` or `test`) and push it to your remote repository.
 
@@ -493,7 +493,7 @@ It's your project. Do what you want! But if you're interested, here's a rational
 
   If you've [set up your CodePipelines](#automated-deployment), the same thing will happen when you merge your feature branch with the `dev` branch.
 
-- This remote build will often fail catastrophically and require you to [delete the `dev` stack](#deleting-a-stack) & start over. Once it doesn't—and assuming all your other tests pass—you can [create a prerelease](#release-management) and deploy the stable build to your `test` stage for integration testing by merging your `dev` branch into `test`.
+- This remote build will often fail catastrophically and require you to [delete the `dev` stack](#deleting-a-stack) & start over. Once it doesn't—and assuming all your other tests pass—you can [create a prerelease](#release-management) and deploy the stable build to your `test` Stack for integration testing by merging your `dev` branch into `test`.
 
 - Once your integration tests pass, you can [create a release](#release-management) and deploy the new feature into production by merging your `test` branch into `main`.
 
@@ -597,7 +597,17 @@ Test your setup by attempting a remote deployment. If your deployment succeeds, 
 
 # API Endpoints
 
-TODO
+The base API path for any stack is:
+
+```bash
+https:<API_SUBDOMAIN>.<ROOT_DOMAIN>/API_VERSION[-{non-prod ENV}]
+
+# Example: ENV=dev, API_VERSION=v0, endpoint=/hello
+https://aws-api-template.karmanivero.us/v0-dev/hello
+
+# Example: ENV=prod, API_VERSION=v0, endpoint=/hello
+https://aws-api-template.karmanivero.us/v0/hello
+```
 
 # Issues
 
@@ -653,7 +663,7 @@ Warning: Invalid configuration encountered
 Learn more about configuration validation here: http://slss.io/configuration-validation
 ```
 
-You can ignore this warning.
+You can ignore this warning and track the issue [here](https://github.com/serverless/serverless/issues/11611).
 
 ## User Accounts
 
