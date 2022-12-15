@@ -451,29 +451,27 @@ To accomplish this, follow these steps:
 
 You can continue to release new versions within this major version. Just don't advance this branch to a new major version, or you will overwrite your existing next-version stacks!
 
-[TODO] Figure out how to prevent this from happening ([#11](#11)).
+[TODO] Figure out how to prevent this from happening ([#11](https://github.com/karmaniverous/aws-api-template/issues/11)).
 
 ## Deleting a Stack
 
-Every Stage you deploy to AWS generates & updates its own [CloudFormation stack](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html), which contains all of the resources associated with the Stage.
+Some [Stack](#environments-api-versions-stages--stacks) resources have properties that can only be set at create time (e.g. [Cognito User Pool AliasAttributes](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cognito-userpool.html#cfn-cognito-userpool-aliasattributes)). If you wish to change such a property, and if you will not unduly impact current users, the easiest option by far is to delete the entire stack and recreate it with the next deployment.
 
-Some resources have properties that can only be set at create time (e.g. [Cognito User Pool AliasAttributes](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cognito-userpool.html#cfn-cognito-userpool-aliasattributes)). If you wish to change such a property, and if you will not unduly impact current users, the easiest option by far is to delete the entire stack and recreate it with the next deployment.
+As you change your Stack configuration during the development process, your Stack might also simply become unstable and stop accepting new deployments. Deleting the Stack is often an efficient way to recover from a configuration error and get things moving again.
 
-As you edit your stack configuration during the development process, your stack might also simply become unstable and stop accepting new deployments. Deleting the stack is often an efficient way to recover from a configuration error and get things moving again.
+**Use with extreme caution!** Stack deletion will also eliminate all user accounts in the related user pool!
 
-**Use with extreme caution!** Stack deletion will also eliminate all user accounts the related user pool!
+To delete a Stack, follow these instructions:
 
-To delete a stack, follow these instructions:
+1. Find your API subdomain at [API Gateway Custom Domains](https://us-east-1.console.aws.amazon.com/apigateway/main/publish/domain-names). Delete all API mappings related to the Stack.
 
-1. Find your API subdomain at [API Gateway Custom Domains](https://us-east-1.console.aws.amazon.com/apigateway/main/publish/domain-names). Delete all API mappings related to the stack.
-
-1. Find the stack in the [CloudFormation console](https://us-east-1.console.aws.amazon.com/cloudformation) and click through to the stack detail.
+1. Find the Stack in the [CloudFormation console](https://us-east-1.console.aws.amazon.com/cloudformation) and click through to the Stack detail.
 
 1. Under the Resources tab, find any S3 Buckets and delete their contents.
 
-1. Delete the stack.
+1. Delete the Stack.
 
-[TODO] Automate this process.
+[TODO] Automate this process ([#10](https://github.com/karmaniverous/aws-api-template/issues/10)).
 
 # Some Thoughts About DevOps
 
@@ -487,15 +485,15 @@ It's your project. Do what you want! But if you're interested, here's a rational
 
   When this fails, you iterate until it doesn't.
 
-- Local builds only take you so far, and there are a ton of AWS services that can only exist remotely. So your next step is to try a remote 'dev' build using
+- Local builds only take you so far, and there are a ton of AWS services that can only exist remotely. So your next step is to try a remote `dev` build using
 
   ```
   dotenv -c dev -- sls deploy --verbose
   ```
 
-  The same thing will happen when you merge your feature branch with the `dev` branch.
+  If you've [set up your CodePipelines](#automated-deployment), the same thing will happen when you merge your feature branch with the `dev` branch.
 
-- This will often fail catastrophically and require you to delete the `dev` stack & start over. Once it doesn't—and assuming all your other tests pass—you can deploy the stable build to your `test` stage for integration testing simply by merging your `dev` branch into `test`.
+- This remote build will often fail catastrophically and require you to [delete the `dev` stack](#deleting-a-stack) & start over. Once it doesn't—and assuming all your other tests pass—you can deploy the stable build to your `test` stage for integration testing by merging your `dev` branch into `test`.
 
 - Once your integration tests pass, you can deploy the new feature into production by merging your `test` branch into `main`.
 
