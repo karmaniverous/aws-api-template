@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "release": "dotenv -- npx release-it"
+    "release": "dotenv -c -- npx release-it"
   },
   "keywords": [],
   "author": "",
