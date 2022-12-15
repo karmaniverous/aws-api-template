@@ -344,7 +344,7 @@ Real AWS administrators are probably breaking out into hives right now, but you'
 
 #### Create Your Pipeline
 
-If you are building this from scratch, you are probably operating from your `main` branch, which you will want to associate with your `prod` stage. Let's proceed on that assumption.
+If you are building this from scratch, you are probably operating from your `main` branch, which you will want to associate with your `prod` [Stage](#environments-api-versions-stages--stacks). Let's proceed on that assumption.
 
 **Before you begin...** Your pipeline will pull your repo and start a build as soon as it is created! Commit all of your local changes and push your commits to GitHub.
 
@@ -352,7 +352,7 @@ From your [Pipelines Dashboard](https://us-east-1.console.aws.amazon.com/codesui
 
 **Step 1: Choose Pipeline Settings**
 
-1. Give the pipeline a name that reflects both the project and your stage: `<service-name>-<stage>`
+1. Give the pipeline a name that reflects both the service name and the target [Environment](#environments-api-versions-stages--stacks): `<SERVICE_NAME>-<ENV>`
 
 1. We will allow CodePipeline to create a service role for us, and then we will use it in all future pipelines. The arguments against this for CodeBuild don't apply here because the CodePipeline role will always need the _same_ access. Call the new role `codepipeline-service`.
 
@@ -376,7 +376,7 @@ This is where CodePipeline gets its code. The instructions below assume you use 
 
 1. Since this is our first pipeline for this project, we will need to create a CodeBuild project. Click the _Create Project_ button. A popup will appear and take you to a build project creation dialogue. In this dialogue...
 
-   1. Choose a project name that will be consistent across the project: `<service-name>`
+   1. Choose a project name that will be consistent across the project: `<SERVICE_NAME>`
 
    1. Use a Managed Image with the following settings:
 
@@ -388,15 +388,15 @@ This is where CodePipeline gets its code. The instructions below assume you use 
 
    1. At the bottom of the dialogue, click _Continue to CodePipeline_.
 
-1. Back in the CodePipeline window, use the _Add environment variable_ button to add the contents of `.env.<stage>.local`. **These variable names & values are case-sensitive!**
+1. Back in the CodePipeline window, use the _Add environment variable_ button to add the contents of `.env.<ENV>.local`. **These variable names & values are case-sensitive!**
 
-   Since this is your first time through, you probably haven't populated any OAUTH client secrets (e.g. `GOOGLE_CLIENT_SECRET`). If so, just add those variables as placeholders and leave them blank.
+   Since this is your first time through, you probably haven't populated any OAUTH client secrets (e.g. `GOOGLE_CLIENT_SECRET`). If so, just add those variables as placeholders. **Note that they may NOT be blank!** If undefined, many of these variables must be populated with `*`. See the `.env.<ENV>.local` file for specifics.
 
 1. Click _Next_.
 
 **Step 4: Add Deploy Stage**
 
-We're the Serverless Framework to deploy from [`buildspec.yml`](./buildspec.yml), so click the _Skip deploy stage_ button & confirm.
+We're using the Serverless Framework to deploy from [`buildspec.yml`](./buildspec.yml), so click the _Skip deploy stage_ button & confirm.
 
 **Step 5: Review**
 
