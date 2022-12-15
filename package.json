@@ -1,11 +1,11 @@
 {
   "name": "@karmaniverous/aws-api-template",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "release": "dotenv -- npx release-it"
+    "release": "dotenv -c -- npx release-it"
   },
   "keywords": [],
   "author": "",
