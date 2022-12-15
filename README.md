@@ -603,7 +603,7 @@ The base API path for any stack is:
 https:<API_SUBDOMAIN>.<ROOT_DOMAIN>/API_VERSION[-{non-prod ENV}]
 
 # Example: ENV=dev, API_VERSION=v0, endpoint=/hello
-https://aws-api-template.karmanivero.us/v0-dev/hello
+[https://aws-api-template.karmanivero.us/v0-dev/hello](https://aws-api-template.karmanivero.us/v0-dev/hello)
 
 # Example: ENV=prod, API_VERSION=v0, endpoint=/hello
 https://aws-api-template.karmanivero.us/v0/hello
