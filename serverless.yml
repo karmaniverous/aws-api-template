@@ -7,8 +7,8 @@ plugins:
 
 params:
   default:
-    apiBasePath: ${env:API_VERSION}-${env:STAGE}
-    authSubdomain: ${env:AUTH_SUBDOMAIN_TOKEN}-${env:API_VERSION}-${env:STAGE}
+    apiBasePath: ${env:API_VERSION}-${env:ENV}
+    authSubdomain: ${env:AUTH_SUBDOMAIN_TOKEN}-${env:API_VERSION}-${env:ENV}
   prod:
     apiBasePath: ${env:API_VERSION}
     authSubdomain: ${env:AUTH_SUBDOMAIN_TOKEN}-${env:API_VERSION}
@@ -32,8 +32,8 @@ provider:
   name: aws
   region: us-east-1
   runtime: nodejs18.x
-  stackName: ${env:SERVICE_NAME}-${env:API_VERSION}-${env:STAGE}
-  stage: ${env:API_VERSION}-${env:STAGE}
+  stackName: ${env:SERVICE_NAME}-${env:API_VERSION}-${env:ENV}
+  stage: ${env:API_VERSION}-${env:ENV}
   timeout: 5
 
 custom:

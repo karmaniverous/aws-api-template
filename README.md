@@ -319,7 +319,7 @@ An [AWS CodePipeline](https://aws.amazon.com/codepipeline/) watches a code repos
 1. Launches an [AWS CodeBuild](https://aws.amazon.com/codebuild/) project that...
    1. Allocates a virtual machine & imports the code repository.
    1. Loads all supporting applications (e.g. the Serverless Framework) and project dependencies.
-   1. Deploys the designated stage, _exactly as you would do from your desktop!_
+   1. Deploys the [Stage](#environments-api-versions-stages--stacks) defined by `API_VERSION` and the configured [Environment](#environments-api-versions-stages--stacks), _exactly as you would do from your desktop!_
    1. Preserves the logs and deallocates the virtual machine.
 
 There is one CodePipeline for eached watched branch, each corresponding a deployment Stage. All of them call the same CodeBuild project. Each CodePipeline is manually configured with a small set of environmental variables, which it injects into the CodeBuild project. These are the environment secrets contained in each `.env.<stage>.local` file, which are blocked by `.gitignore` and are never pushed to the code repository.
