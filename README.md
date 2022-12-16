@@ -172,6 +172,8 @@ Run the following command to install project dependencies:
 npm install
 ```
 
+Set the version in [`package.json`](./package.json) to `0.0.0`.
+
 ## Create Local Environment Variable Files
 
 Look for these files in your project directory:
