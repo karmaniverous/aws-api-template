@@ -5,13 +5,21 @@ plugins:
   - serverless-domain-manager
   - serverless-offline
 
-params:
-  prod:
-    apiBasePath: ${env:API_VERSION}
-    authSubdomain: ${env:AUTH_SUBDOMAIN_TOKEN}-${env:API_VERSION}
-  default:
-    apiBasePath: ${env:API_VERSION}-${env:ENV}
-    authSubdomain: ${env:AUTH_SUBDOMAIN_TOKEN}-${env:API_VERSION}-${env:ENV}
+custom:
+  apiBasePath: ${self:custom.env2apiBasePath.${env:ENV}}
+  authSubdomain: ${self:custom.env2authSubdomain.${env:ENV}}
+  env2apiBasePath:
+    dev: ${env:API_VERSION}-${env:ENV}
+    test: ${env:API_VERSION}-${env:ENV}
+    prod: ${env:API_VERSION}
+  env2authSubdomain:
+    dev: ${env:AUTH_SUBDOMAIN_TOKEN}-${env:API_VERSION}-${env:ENV}
+    test: ${env:AUTH_SUBDOMAIN_TOKEN}-${env:API_VERSION}-${env:ENV}
+    prod: ${env:AUTH_SUBDOMAIN_TOKEN}-${env:API_VERSION}
+  customDomain:
+    domainName: ${env:API_SUBDOMAIN}.${env:ROOT_DOMAIN}
+    basePath: ${self:custom.apiBasePath}
+    certificateArn: ${env:CERTIFICATE_ARN}
 
 provider:
   apiGateway:
@@ -35,12 +43,6 @@ provider:
   stackName: ${env:SERVICE_NAME}-${env:API_VERSION}-${env:ENV}
   stage: ${env:API_VERSION}-${env:ENV}
   timeout: 5
-
-custom:
-  customDomain:
-    domainName: ${env:API_SUBDOMAIN}.${env:ROOT_DOMAIN}
-    basePath: ${param:apiBasePath}
-    certificateArn: ${env:CERTIFICATE_ARN}
 
 functions:
   hello:
@@ -155,7 +157,7 @@ resources:
       Properties:
         CustomDomainConfig:
           CertificateArn: ${env:CERTIFICATE_ARN}
-        Domain: ${param:authSubdomain}.${env:ROOT_DOMAIN}
+        Domain: ${self:custom.authSubdomain}.${env:ROOT_DOMAIN}
         UserPoolId: !Ref UserPool
 
     UserPoolAlias:
@@ -164,7 +166,7 @@ resources:
       Properties:
         HostedZoneName: '${env:ROOT_DOMAIN}.'
         RecordSets:
-          - Name: ${param:authSubdomain}.${env:ROOT_DOMAIN}.
+          - Name: ${self:custom.authSubdomain}.${env:ROOT_DOMAIN}.
             ResourceRecords:
               - !GetAtt UserPoolDomain.CloudFrontDistribution
             TTL: '300'
