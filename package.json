@@ -1,15 +1,9 @@
 {
   "name": "@karmaniverous/aws-api-template",
-  "version": "0.1.2",
   "description": "Config-driven AWS API ES6 template integrating federated Cognito User Pool authentication and a robust approach to release management.",
-  "main": "index.js",
-  "type": "module",
-  "scripts": {
-    "release": "dotenv -c -- npx release-it"
-  },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Jason Williscroft",
+  "license": "BSD-3-Clause",
   "devDependencies": {
     "dotenv-cli": "^6.0.0",
     "release-it": "^15.5.1",
@@ -27,8 +21,12 @@
       "release": true
     },
     "npm": {
-      "publish": false,
-      "skipChecks": true
+      "publish": false
     }
-  }
+  },
+  "scripts": {
+    "release": "dotenv -c -- release-it"
+  },
+  "type": "module",
+  "version": "0.1.2"
 }
