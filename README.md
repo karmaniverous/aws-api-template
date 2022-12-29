@@ -1,6 +1,6 @@
 # AWS API Template
 
-Getting your applicaion's back end up and running on AWS is not a trivial exercise, especially if you want a robust and extensible result that will support a modern development process.
+Getting your application's back end up and running on [Amazon Web Services](https://aws.amazon.com/) (AWS) is not a trivial exercise, especially if you want a robust and extensible result that will support a modern development process.
 
 Here's a plug-and-play [AWS API template](https://github.com/karmaniverous/aws-api-template) that offers the following features:
 
@@ -19,6 +19,12 @@ Here's a plug-and-play [AWS API template](https://github.com/karmaniverous/aws-a
 - Built-in backwards compatibility. Every major release triggers the deployment of an independent Stack on every environment. Share key resources across Stacks so you can bring your users with you across major versions.
 
 - Automatically build and deploy the relevant Stack following every code push with [AWS CodePipeline](https://aws.amazon.com/codepipeline/). See [Automated Deployment](#automated-deployment) below for more info.
+
+- Code formatting at every save & paste with
+  [`prettier`](https://www.npmjs.com/package/prettier).
+
+- One-button release to GitHub with
+  [`release-it`](https://www.npmjs.com/package/release-it).
 
 **[Click here](https://karmanivero.us/blog/aws-api-template/) for full
 documentation & instructions!**
