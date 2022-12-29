@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "dotenv-cli": "^6.0.0",
     "release-it": "^15.5.1",
     "serverless-domain-manager": "^6.2.1",
     "serverless-offline": "^11.6.0"
