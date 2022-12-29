@@ -6,12 +6,12 @@ plugins:
   - serverless-offline
 
 params:
-  default:
-    apiBasePath: ${env:API_VERSION}-${env:ENV}
-    authSubdomain: ${env:AUTH_SUBDOMAIN_TOKEN}-${env:API_VERSION}-${env:ENV}
   prod:
     apiBasePath: ${env:API_VERSION}
     authSubdomain: ${env:AUTH_SUBDOMAIN_TOKEN}-${env:API_VERSION}
+  default:
+    apiBasePath: ${env:API_VERSION}-${env:ENV}
+    authSubdomain: ${env:AUTH_SUBDOMAIN_TOKEN}-${env:API_VERSION}-${env:ENV}
 
 provider:
   apiGateway:
