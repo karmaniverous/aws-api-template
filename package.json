@@ -1,7 +1,7 @@
 {
   "name": "@karmaniverous/aws-api-template",
   "version": "0.1.2",
-  "description": "",
+  "description": "Config-driven AWS API ES6 template integrating federated Cognito User Pool authentication and a robust approach to release management.",
   "main": "index.js",
   "type": "module",
   "scripts": {
