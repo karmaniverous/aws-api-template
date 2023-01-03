@@ -8,6 +8,7 @@ plugins:
 custom:
   apiBasePath: ${self:custom.env2apiBasePath.${env:ENV}}
   authSubdomain: ${self:custom.env2authSubdomain.${env:ENV}}
+  webSubdomain: ${self:custom.env2webSubdomain.${env:ENV}}
   env2apiBasePath:
     dev: ${env:API_VERSION}-${env:ENV}
     test: ${env:API_VERSION}-${env:ENV}
@@ -16,6 +17,10 @@ custom:
     dev: ${env:AUTH_SUBDOMAIN_TOKEN}-${env:API_VERSION}-${env:ENV}
     test: ${env:AUTH_SUBDOMAIN_TOKEN}-${env:API_VERSION}-${env:ENV}
     prod: ${env:AUTH_SUBDOMAIN_TOKEN}-${env:API_VERSION}
+  env2webSubdomain:
+    dev: ${env:WEB_SUBDOMAIN_TOKEN}-${env:ENV}
+    test: ${env:WEB_SUBDOMAIN_TOKEN}-${env:ENV}
+    prod: ${env:AUTH_SUBDOMAIN_TOKEN}
   customDomain:
     domainName: ${env:API_SUBDOMAIN}.${env:ROOT_DOMAIN}
     basePath: ${self:custom.apiBasePath}
@@ -133,15 +138,13 @@ resources:
           - profile
         CallbackURLs:
           - 'https://${env:ROOT_DOMAIN}/api/auth/callback/cognito'
-          - 'https://${env:WEB_SUBDOMAIN_PROD}.${env:ROOT_DOMAIN}/api/auth/callback/cognito'
-          - 'https://${env:WEB_SUBDOMAIN_PREVIEW}.${env:ROOT_DOMAIN}/api/auth/callback/cognito'
+          - 'https://${self:custom.webSubdomain}.${env:ROOT_DOMAIN}/api/auth/callback/cognito'
           - 'http://localhost:${env:WEB_LOCALHOST_PORT}/api/auth/callback/cognito'
         ClientName: web-app
         GenerateSecret: true
         LogoutURLs:
           - 'https://${env:ROOT_DOMAIN}'
-          - 'https://${env:WEB_SUBDOMAIN_PROD}.${env:ROOT_DOMAIN}'
-          - 'https://${env:WEB_SUBDOMAIN_PREVIEW}.${env:ROOT_DOMAIN}'
+          - 'https://${self:custom.webSubdomain}.${env:ROOT_DOMAIN}'
           - 'http://localhost:${env:WEB_LOCALHOST_PORT}'
         SupportedIdentityProviders:
           - COGNITO
