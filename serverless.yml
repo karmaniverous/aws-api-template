@@ -20,7 +20,7 @@ custom:
   env2webSubdomain:
     dev: ${env:WEB_SUBDOMAIN_TOKEN}-${env:ENV}
     test: ${env:WEB_SUBDOMAIN_TOKEN}-${env:ENV}
-    prod: ${env:AUTH_SUBDOMAIN_TOKEN}
+    prod: ${env:WEB_SUBDOMAIN_TOKEN}
   customDomain:
     domainName: ${env:API_SUBDOMAIN}.${env:ROOT_DOMAIN}
     basePath: ${self:custom.apiBasePath}
