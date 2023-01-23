@@ -5,9 +5,16 @@
   "author": "Jason Williscroft",
   "license": "BSD-3-Clause",
   "devDependencies": {
+    "@karmaniverous/get-dotenv": "^0.1.1",
+    "chai": "^4.3.7",
     "concat-md": "^0.5.0",
     "dotenv-cli": "^6.0.0",
+    "eslint": "^8.32.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-mocha": "^10.1.0",
     "jsdoc-to-markdown": "^8.0.0",
+    "mocha": "^10.2.0",
+    "prettier": "^2.8.3",
     "release-it": "^15.6.0",
     "serverless-domain-manager": "^6.2.1",
     "serverless-offline": "^11.6.0"
@@ -18,6 +25,12 @@
     "@middy/http-error-handler": "^4.0.4",
     "aws-sdk": "^2.1271.0"
   },
+  "mocha": {
+    "exclude": [
+      "./node_modules/**"
+    ],
+    "spec": "./**/*.test.!(*.*)"
+  },
   "release-it": {
     "github": {
       "release": true
@@ -27,8 +40,11 @@
     }
   },
   "scripts": {
+    "lint": "eslint lib/** api/**",
+    "test": "mocha",
     "doc": "jsdoc2md -c doc/jsdoc.config.json -f lib/**/*.* -t doc/lib-template.hbs > doc/2-lib.md && concat-md doc --hide-anchor-links > README.md",
-    "release": "dotenv -c -- release-it"
+    "package": "npm run lint && npm run test && npm run doc",
+    "release": "npm run package && getdotenv -- release-it"
   },
   "type": "module",
   "version": "0.1.6"

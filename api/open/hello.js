@@ -4,7 +4,7 @@ import httpErrorHandler from '@middy/http-error-handler';
 
 import { hello } from '../../lib/hello';
 
-export const get = middy(async (event) => {
+export const get = middy(async (/* event */) => {
   return {
     statusCode: 200,
     body: JSON.stringify({
