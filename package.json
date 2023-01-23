@@ -47,5 +47,5 @@
     "release": "npm run package && getdotenv -- release-it"
   },
   "type": "module",
-  "version": "0.1.6"
+  "version": "0.2.0"
 }
