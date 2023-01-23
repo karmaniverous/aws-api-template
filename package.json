@@ -5,7 +5,9 @@
   "author": "Jason Williscroft",
   "license": "BSD-3-Clause",
   "devDependencies": {
+    "concat-md": "^0.5.0",
     "dotenv-cli": "^6.0.0",
+    "jsdoc-to-markdown": "^8.0.0",
     "release-it": "^15.6.0",
     "serverless-domain-manager": "^6.2.1",
     "serverless-offline": "^11.6.0"
@@ -25,6 +27,7 @@
     }
   },
   "scripts": {
+    "doc": "jsdoc2md -c doc/jsdoc.config.json -f lib/**/*.* -t doc/lib-template.hbs > doc/2-lib.md && concat-md doc --hide-anchor-links > README.md",
     "release": "dotenv -c -- release-it"
   },
   "type": "module",

@@ -28,22 +28,3 @@ Here's a plug-and-play [AWS API template](https://github.com/karmaniverous/aws-a
 
 **[Click here](https://karmanivero.us/blog/aws-api-template/) for full
 documentation & instructions!**
-
-# Library Documentation
-
-<a name="hello"></a>
-
-## hello(id) ⇒ <code>any</code>
-Returns a greeting.
-
-**Kind**: global function  
-**Returns**: <code>any</code> - A friendly greeting.  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| id | <code>any</code> | An identity. |
-
-
----
-
-[Click here](https://karmanivero.us/blog/aws-api-template) to review this template's documentation.
