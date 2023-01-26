@@ -41,7 +41,7 @@
   "scripts": {
     "lint": "eslint lib/** api/**",
     "test": "mocha",
-    "doc": "jsdoc2md -c doc/jsdoc.config.json -f lib/**/*.* -t doc/lib-template.hbs > doc/2-lib.md && concat-md doc --hide-anchor-links > README.md",
+    "doc": "jsdoc2md -c doc/jsdoc.config.json -f lib/**/*.* -t doc/lib-template.hbs > doc/2-lib.jsdoc2.md && concat-md doc --hide-anchor-links > README.md",
     "package": "npm run lint && npm run test && npm run doc",
     "release": "npm run package && getdotenv -- release-it"
   },
