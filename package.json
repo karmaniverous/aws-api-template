@@ -16,13 +16,13 @@
     "prettier": "^2.8.3",
     "release-it": "^15.6.0",
     "serverless-domain-manager": "^6.2.1",
-    "serverless-offline": "^11.6.0"
+    "serverless-offline": "^12.0.4"
   },
   "dependencies": {
-    "@middy/core": "^4.0.5",
-    "@middy/http-cors": "^4.0.4",
-    "@middy/http-error-handler": "^4.0.4",
-    "aws-sdk": "^2.1271.0"
+    "@middy/core": "^4.2.1",
+    "@middy/http-cors": "^4.2.1",
+    "@middy/http-error-handler": "^4.2.1",
+    "aws-sdk": "^2.1304.0"
   },
   "mocha": {
     "exclude": [
@@ -42,6 +42,7 @@
     "deploy": "getdotenv -c \"sls deploy --verbose\" -p ./ ./env -d dev",
     "doc": "jsdoc2md -c doc/jsdoc.config.json -f lib/**/*.* -t doc/lib-template.hbs > doc/2-lib.jsdoc2.md && concat-md doc --hide-anchor-links > README.md",
     "lint": "eslint lib/** api/**",
+    "offline": "getdotenv -c \"sls offline \" -p ./ ./env -d dev",
     "package": "npm run lint && npm run test && npm run doc",
     "release": "npm run package && getdotenv -- release-it",
     "test": "mocha"
