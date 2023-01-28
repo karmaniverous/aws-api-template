@@ -13,7 +13,7 @@ phases:
     commands:
       - echo Deployment started on `date`
       - echo Deploying with the Serverless Framework
-      - npx getdotenv -e $ENV -- sls deploy --verbose
+      - npx getdotenv -p ./ ./env -e $ENV -- sls deploy --verbose
   post_build:
     commands:
       - echo Deployment completed on `date`

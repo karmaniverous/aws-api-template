@@ -5,7 +5,7 @@
   "author": "Jason Williscroft",
   "license": "BSD-3-Clause",
   "devDependencies": {
-    "@karmaniverous/get-dotenv": "^0.1.2",
+    "@karmaniverous/get-dotenv": "^0.2.2",
     "chai": "^4.3.7",
     "concat-md": "^0.5.0",
     "eslint": "^8.32.0",
@@ -39,11 +39,12 @@
     }
   },
   "scripts": {
-    "lint": "eslint lib/** api/**",
-    "test": "mocha",
+    "deploy": "getdotenv -c \"sls deploy --verbose\" -p ./ ./env -d dev",
     "doc": "jsdoc2md -c doc/jsdoc.config.json -f lib/**/*.* -t doc/lib-template.hbs > doc/2-lib.jsdoc2.md && concat-md doc --hide-anchor-links > README.md",
+    "lint": "eslint lib/** api/**",
     "package": "npm run lint && npm run test && npm run doc",
-    "release": "npm run package && getdotenv -- release-it"
+    "release": "npm run package && getdotenv -- release-it",
+    "test": "mocha"
   },
   "type": "module",
   "version": "0.2.1"
