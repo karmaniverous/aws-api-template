@@ -5,25 +5,25 @@
   "author": "Jason Williscroft",
   "license": "BSD-3-Clause",
   "devDependencies": {
-    "@karmaniverous/get-dotenv": "^0.1.1",
+    "@karmaniverous/get-dotenv": "^0.2.2",
     "chai": "^4.3.7",
     "concat-md": "^0.5.0",
-    "dotenv-cli": "^6.0.0",
     "eslint": "^8.32.0",
     "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-jsdoc": "^39.7.4",
     "eslint-plugin-mocha": "^10.1.0",
     "jsdoc-to-markdown": "^8.0.0",
     "mocha": "^10.2.0",
     "prettier": "^2.8.3",
     "release-it": "^15.6.0",
     "serverless-domain-manager": "^6.2.1",
-    "serverless-offline": "^11.6.0"
+    "serverless-offline": "^12.0.4"
   },
   "dependencies": {
-    "@middy/core": "^4.0.5",
-    "@middy/http-cors": "^4.0.4",
-    "@middy/http-error-handler": "^4.0.4",
-    "aws-sdk": "^2.1271.0"
+    "@middy/core": "^4.2.1",
+    "@middy/http-cors": "^4.2.1",
+    "@middy/http-error-handler": "^4.2.1",
+    "aws-sdk": "^2.1304.0"
   },
   "mocha": {
     "exclude": [
@@ -40,12 +40,14 @@
     }
   },
   "scripts": {
+    "deploy": "getdotenv -c \"sls deploy --verbose\" -p ./ ./env -d dev",
+    "doc": "jsdoc2md -c doc/jsdoc.config.json -f lib/**/*.* -t doc/lib-template.hbs > doc/2-lib.jsdoc2.md && concat-md doc --hide-anchor-links > README.md",
     "lint": "eslint lib/** api/**",
-    "test": "mocha",
-    "doc": "jsdoc2md -c doc/jsdoc.config.json -f lib/**/*.* -t doc/lib-template.hbs > doc/2-lib.md && concat-md doc --hide-anchor-links > README.md",
+    "offline": "getdotenv -c \"sls offline \" -p ./ ./env -d dev",
     "package": "npm run lint && npm run test && npm run doc",
-    "release": "npm run package && getdotenv -- release-it"
+    "release": "npm run package && getdotenv -- release-it",
+    "test": "mocha"
   },
   "type": "module",
-  "version": "0.2.1"
+  "version": "0.2.2"
 }
