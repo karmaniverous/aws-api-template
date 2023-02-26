@@ -53,5 +53,5 @@
     "test": "getdotenv -c \"mocha\" -p ./ ./env -d dev -y ./env/.env.js"
   },
   "type": "module",
-  "version": "0.2.3"
+  "version": "0.2.4"
 }
