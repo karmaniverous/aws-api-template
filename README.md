@@ -47,3 +47,18 @@ Returns a greeting.
 ---
 
 [Click here](https://karmanivero.us/blog/aws-api-template) to review this template's documentation.
+
+# Library Documentation
+
+<a name="hello"></a>
+
+## hello(id) ⇒ <code>any</code>
+Returns a greeting.
+
+**Kind**: global function  
+**Returns**: <code>any</code> - A friendly greeting.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| id | <code>any</code> | An identity. |
+
