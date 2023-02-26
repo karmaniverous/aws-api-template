@@ -4,6 +4,7 @@
     "redhat.vscode-yaml",
     "amazonwebservices.aws-toolkit-vscode",
     "dbaeumer.vscode-eslint",
-    "hbenl.vscode-mocha-test-adapter"
+    "hbenl.vscode-mocha-test-adapter",
+    "rangav.vscode-thunder-client"
   ]
 }

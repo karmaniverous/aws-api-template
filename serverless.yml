@@ -8,7 +8,10 @@ plugins:
 custom:
   apiBasePath: ${self:custom.env2apiBasePath.${env:ENV}}
   authSubdomain: ${self:custom.env2authSubdomain.${env:ENV}}
-  webSubdomain: ${self:custom.env2webSubdomain.${env:ENV}}
+  customDomain:
+    domainName: ${env:API_SUBDOMAIN}.${env:ROOT_DOMAIN}
+    basePath: ${self:custom.apiBasePath}
+    certificateArn: ${env:CERTIFICATE_ARN}
   env2apiBasePath:
     dev: ${env:API_VERSION}-${env:ENV}
     test: ${env:API_VERSION}-${env:ENV}
@@ -21,10 +24,7 @@ custom:
     dev: ${env:WEB_SUBDOMAIN_TOKEN}-${env:ENV}
     test: ${env:WEB_SUBDOMAIN_TOKEN}-${env:ENV}
     prod: ${env:WEB_SUBDOMAIN_TOKEN}
-  customDomain:
-    domainName: ${env:API_SUBDOMAIN}.${env:ROOT_DOMAIN}
-    basePath: ${self:custom.apiBasePath}
-    certificateArn: ${env:CERTIFICATE_ARN}
+  webSubdomain: ${self:custom.env2webSubdomain.${env:ENV}}
 
 provider:
   apiGateway:
