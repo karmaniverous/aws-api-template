@@ -2,7 +2,7 @@ import middy from '@middy/core';
 import cors from '@middy/http-cors';
 import httpErrorHandler from '@middy/http-error-handler';
 
-import { hello } from '../../lib/hello.js';
+import { hello } from '../../lib/util/hello.js';
 
 export const get = middy(async (/* event */) => {
   return {

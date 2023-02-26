@@ -9,5 +9,7 @@
   "yaml.format.singleQuote": true,
   "[markdown]": {
     "editor.wordWrap": "bounded"
-  }
+  },
+  "testExplorer.mergeSuites": true,
+  "thunder-client.saveToWorkspace": true
 }

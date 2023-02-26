@@ -5,25 +5,26 @@
   "author": "Jason Williscroft",
   "license": "BSD-3-Clause",
   "devDependencies": {
-    "@karmaniverous/get-dotenv": "^0.2.2",
+    "@babel/eslint-parser": "^7.19.1",
+    "@karmaniverous/get-dotenv": "^0.2.3",
     "chai": "^4.3.7",
-    "concat-md": "^0.5.0",
-    "eslint": "^8.32.0",
+    "concat-md": "^0.5.1",
+    "eslint": "^8.34.0",
     "eslint-config-standard": "^17.0.0",
-    "eslint-plugin-jsdoc": "^39.7.4",
+    "eslint-plugin-jsdoc": "^40.0.0",
     "eslint-plugin-mocha": "^10.1.0",
     "jsdoc-to-markdown": "^8.0.0",
     "mocha": "^10.2.0",
-    "prettier": "^2.8.3",
+    "prettier": "^2.8.4",
     "release-it": "^15.6.0",
-    "serverless-domain-manager": "^6.2.1",
+    "serverless-domain-manager": "^6.4.4",
     "serverless-offline": "^12.0.4"
   },
   "dependencies": {
-    "@middy/core": "^4.2.1",
-    "@middy/http-cors": "^4.2.1",
-    "@middy/http-error-handler": "^4.2.1",
-    "aws-sdk": "^2.1304.0"
+    "@babel/plugin-syntax-import-assertions": "^7.20.0",
+    "@middy/core": "^4.2.6",
+    "@middy/http-cors": "^4.2.6",
+    "@middy/http-error-handler": "^4.2.6"
   },
   "mocha": {
     "exclude": [
@@ -43,10 +44,11 @@
     "deploy": "getdotenv -c \"sls deploy --verbose\" -p ./ ./env -d dev",
     "doc": "jsdoc2md -c doc/jsdoc.config.json -f lib/**/*.* -t doc/lib-template.hbs > doc/2-lib.jsdoc2.md && concat-md doc --hide-anchor-links > README.md",
     "lint": "eslint lib/** api/**",
-    "offline": "getdotenv -c \"sls offline \" -p ./ ./env -d dev",
-    "package": "npm run lint && npm run test && npm run doc",
-    "release": "npm run package && getdotenv -- release-it",
-    "test": "mocha"
+    "offline": "getdotenv -c \"sls offline\" -p ./ ./env -d dev",
+    "package": "getdotenv -c \"sls package\" -p ./ ./env -d dev",
+    "prerelease": "npm run lint && npm run test && npm run doc && npm run package",
+    "release": "npm run prerelease && getdotenv -- release-it",
+    "test": "getdotenv -c \"mocha\" -p ./ ./env -d dev"
   },
   "type": "module",
   "version": "0.2.2"

@@ -6,4 +6,5 @@ jspm_packages
 .serverless
 
 # Local secrets
+local
 *.local
