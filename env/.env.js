@@ -1,0 +1,15 @@
+export default {
+  API_BASE_PATH: ({ API_VERSION, ENV, PROD_ENV_TOKEN }) =>
+    `${API_VERSION}${ENV === PROD_ENV_TOKEN ? '' : `-${ENV}`}`,
+  AUTH_SUBDOMAIN: ({
+    API_VERSION,
+    AUTH_SUBDOMAIN_TOKEN,
+    ENV,
+    PROD_ENV_TOKEN,
+  }) =>
+    `${AUTH_SUBDOMAIN_TOKEN}-${API_VERSION}${
+      ENV === PROD_ENV_TOKEN ? '' : `-${ENV}`
+    }`,
+  WEB_SUBDOMAIN: ({ WEB_SUBDOMAIN_TOKEN, ENV, PROD_ENV_TOKEN }) =>
+    `${WEB_SUBDOMAIN_TOKEN}${ENV === PROD_ENV_TOKEN ? '' : `-${ENV}`}`,
+};

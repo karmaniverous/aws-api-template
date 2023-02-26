@@ -6,7 +6,7 @@
   "license": "BSD-3-Clause",
   "devDependencies": {
     "@babel/eslint-parser": "^7.19.1",
-    "@karmaniverous/get-dotenv": "^0.2.3",
+    "@karmaniverous/get-dotenv": "^0.3.1",
     "chai": "^4.3.7",
     "concat-md": "^0.5.1",
     "eslint": "^8.34.0",
@@ -30,7 +30,9 @@
     "exclude": [
       "./node_modules/**"
     ],
-    "spec": "./**/*.test.!(*.*)"
+    "file": "./test/setup.js",
+    "spec": "./**/*.test.!(*.*)",
+    "timeout": 60000
   },
   "release-it": {
     "github": {
@@ -41,14 +43,14 @@
     }
   },
   "scripts": {
-    "deploy": "getdotenv -c \"sls deploy --verbose\" -p ./ ./env -d dev",
-    "doc": "jsdoc2md -c doc/jsdoc.config.json -f lib/**/*.* -t doc/lib-template.hbs > doc/2-lib.jsdoc2.md && concat-md doc --hide-anchor-links > README.md",
+    "deploy": "getdotenv -c \"sls deploy --verbose\" -p ./ ./env -d dev -y ./env/.env.js",
+    "doc": "jsdoc2md -c doc/jsdoc.config.json -f lib/**/*.* -t doc/lib-template.hbs > doc/3-lib.jsdoc2.md && concat-md doc --hide-anchor-links > README.md",
     "lint": "eslint lib/** api/**",
-    "offline": "getdotenv -c \"sls offline\" -p ./ ./env -d dev",
-    "package": "getdotenv -c \"sls package\" -p ./ ./env -d dev",
+    "offline": "getdotenv -c \"sls offline\" -p ./ ./env -d dev -y ./env/.env.js",
+    "package": "getdotenv -c \"sls package\" -p ./ ./env -d dev -y ./env/.env.js",
     "prerelease": "npm run lint && npm run test && npm run doc && npm run package",
     "release": "npm run prerelease && getdotenv -- release-it",
-    "test": "getdotenv -c \"mocha\" -p ./ ./env -d dev"
+    "test": "getdotenv -c \"mocha\" -p ./ ./env -d dev -y ./env/.env.js"
   },
   "type": "module",
   "version": "0.2.3"

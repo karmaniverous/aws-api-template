@@ -5,26 +5,19 @@ plugins:
   - serverless-domain-manager
   - serverless-offline
 
+##############
+#   CUSTOM   #
+##############
+
 custom:
-  apiBasePath: ${self:custom.env2apiBasePath.${env:ENV}}
-  authSubdomain: ${self:custom.env2authSubdomain.${env:ENV}}
   customDomain:
     domainName: ${env:API_SUBDOMAIN}.${env:ROOT_DOMAIN}
-    basePath: ${self:custom.apiBasePath}
+    basePath: ${env:API_BASE_PATH}
     certificateArn: ${env:CERTIFICATE_ARN}
-  env2apiBasePath:
-    dev: ${env:API_VERSION}-${env:ENV}
-    test: ${env:API_VERSION}-${env:ENV}
-    prod: ${env:API_VERSION}
-  env2authSubdomain:
-    dev: ${env:AUTH_SUBDOMAIN_TOKEN}-${env:API_VERSION}-${env:ENV}
-    test: ${env:AUTH_SUBDOMAIN_TOKEN}-${env:API_VERSION}-${env:ENV}
-    prod: ${env:AUTH_SUBDOMAIN_TOKEN}-${env:API_VERSION}
-  env2webSubdomain:
-    dev: ${env:WEB_SUBDOMAIN_TOKEN}-${env:ENV}
-    test: ${env:WEB_SUBDOMAIN_TOKEN}-${env:ENV}
-    prod: ${env:WEB_SUBDOMAIN_TOKEN}
-  webSubdomain: ${self:custom.env2webSubdomain.${env:ENV}}
+
+################
+#   PROVIDER   #
+################
 
 provider:
   apiGateway:
@@ -33,7 +26,6 @@ provider:
   endpointType: EDGE
   iam:
     role:
-      # name:
       statements:
         - Effect: Allow
           Action:
@@ -48,6 +40,10 @@ provider:
   stackName: ${env:SERVICE_NAME}-${env:API_VERSION}-${env:ENV}
   stage: ${env:API_VERSION}-${env:ENV}
   timeout: 5
+
+#################
+#   FUNCTIONS   #
+#################
 
 functions:
   hello:
@@ -77,6 +73,10 @@ functions:
             claims:
               - email
 
+#################
+#   RESOURCES   #
+#################
+
 resources:
   Conditions:
     CreateUserPool: !Equals ['${env:COGNITO_USER_POOL_ARN}', '*']
@@ -88,6 +88,10 @@ resources:
           - !Equals ['${env:GOOGLE_CLIENT_SECRET}', '*']
 
   Resources:
+    ###################
+    #   API GATEWAY   #
+    ###################
+
     GatewayResponseDefault4XX:
       Type: 'AWS::ApiGateway::GatewayResponse'
       Properties:
@@ -97,6 +101,10 @@ resources:
         ResponseType: DEFAULT_4XX
         RestApiId:
           Ref: 'ApiGatewayRestApi'
+
+    ###############
+    #   COGNITO   #
+    ###############
 
     UserPool:
       Type: AWS::Cognito::UserPool
@@ -138,13 +146,13 @@ resources:
           - profile
         CallbackURLs:
           - 'https://${env:ROOT_DOMAIN}/api/auth/callback/cognito'
-          - 'https://${self:custom.webSubdomain}.${env:ROOT_DOMAIN}/api/auth/callback/cognito'
+          - 'https://${env:WEB_SUBDOMAIN}.${env:ROOT_DOMAIN}/api/auth/callback/cognito'
           - 'http://localhost:${env:WEB_LOCALHOST_PORT}/api/auth/callback/cognito'
         ClientName: web-app
         GenerateSecret: true
         LogoutURLs:
           - 'https://${env:ROOT_DOMAIN}'
-          - 'https://${self:custom.webSubdomain}.${env:ROOT_DOMAIN}'
+          - 'https://${env:WEB_SUBDOMAIN}.${env:ROOT_DOMAIN}'
           - 'http://localhost:${env:WEB_LOCALHOST_PORT}'
         SupportedIdentityProviders:
           - COGNITO
@@ -160,7 +168,7 @@ resources:
       Properties:
         CustomDomainConfig:
           CertificateArn: ${env:CERTIFICATE_ARN}
-        Domain: ${self:custom.authSubdomain}.${env:ROOT_DOMAIN}
+        Domain: ${env:AUTH_SUBDOMAIN}.${env:ROOT_DOMAIN}
         UserPoolId: !Ref UserPool
 
     UserPoolAlias:
@@ -169,7 +177,7 @@ resources:
       Properties:
         HostedZoneName: '${env:ROOT_DOMAIN}.'
         RecordSets:
-          - Name: ${self:custom.authSubdomain}.${env:ROOT_DOMAIN}.
+          - Name: ${env:AUTH_SUBDOMAIN}.${env:ROOT_DOMAIN}.
             ResourceRecords:
               - !GetAtt UserPoolDomain.CloudFrontDistribution
             TTL: '300'
