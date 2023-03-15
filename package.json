@@ -6,7 +6,7 @@
   "license": "BSD-3-Clause",
   "devDependencies": {
     "@babel/eslint-parser": "^7.19.1",
-    "@karmaniverous/get-dotenv": "^0.3.1",
+    "@karmaniverous/get-dotenv": "^1.0.0",
     "chai": "^4.3.7",
     "concat-md": "^0.5.1",
     "eslint": "^8.34.0",
